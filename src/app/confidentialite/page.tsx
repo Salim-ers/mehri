@@ -1,5 +1,9 @@
+import { bookingAction } from "@/components/shared/BookingButton";
 import { PlateHeader } from "@/components/shared/PlateHeader";
-import { pageMetadata } from "@/lib/seo";
+import { identity, practice } from "@/content/practice";
+import { formatAddress } from "@/lib/contact-links";
+import { hasValue } from "@/lib/facts";
+import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Politique de confidentialité",
@@ -10,6 +14,10 @@ export const metadata = pageMetadata({
 export default function ConfidentialitePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Confidentialité", path: "/confidentialite" }])) }}
+      />
       <PlateHeader plate="—" latin="Secretum" title="Confidentialité" />
       <div className="px-[var(--gutter)] pb-24">
         <div className="prose-atlas mx-auto max-w-3xl space-y-10">
@@ -19,11 +27,20 @@ export default function ConfidentialitePage() {
             </h2>
             <p className="mt-5">
               Ce site ne comporte aucun formulaire, aucun compte utilisateur et aucun outil de mesure d&apos;audience. Il ne collecte aucune donnée
-              de santé. La prise de rendez-vous s&apos;effectue par téléphone, directement auprès du cabinet.
+              de santé.{" "}
+              {bookingAction.kind === "online"
+                ? "La réservation en ligne s'effectue sur la plateforme du cabinet, qui dispose de sa propre politique de confidentialité."
+                : "La prise de rendez-vous s'effectue par téléphone, directement auprès du cabinet."}
+            </p>
+            <p>
+              Responsable du traitement : {identity.name}, {identity.title}
+              {hasValue(practice.address) ? `, ${formatAddress(practice.address.value)}` : ""}.
             </p>
             <p>
               Comme tout site web, l&apos;hébergeur enregistre des journaux techniques (adresse IP, date, page demandée) nécessaires à la sécurité et
-              au bon fonctionnement du service, pour une durée limitée.
+              au bon fonctionnement du service, pour une durée limitée. L&apos;hébergeur pressenti (Vercel Inc.) étant établi aux États-Unis, ces
+              journaux peuvent y être traités, dans le cadre des garanties prévues par le RGPD (Data Privacy Framework UE–États-Unis et clauses
+              contractuelles types).
             </p>
           </section>
           <section aria-labelledby="cookies">

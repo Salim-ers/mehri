@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { SpineDrawing } from "@/components/shared/SpineDrawing";
 
-const NAME = "MOHAMED MERHI";
 export const INTRO_KEY = "mm-intro-seen";
 
 /**
@@ -12,7 +11,7 @@ export const INTRO_KEY = "mm-intro-seen";
  * - Ignorée si déjà vue, en mode « économie de données » (script inline du layout).
  * - Un clic, une touche ou un défilement la referment immédiatement.
  */
-export function IntroOverlay() {
+export function IntroOverlay({ name, subtitle }: { name: string; subtitle: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,9 +32,10 @@ export function IntroOverlay() {
     const done = () => {
       root.dataset.intro = "skip";
     };
-    el?.addEventListener("animationend", (e) => {
+    const onEnd = (e: AnimationEvent) => {
       if (e.animationName === "intro-out") done();
-    });
+    };
+    el?.addEventListener("animationend", onEnd);
     // filet de sécurité : jamais plus de 3,2 s, même si l'évènement CSS est manqué
     const safety = window.setTimeout(done, 3200);
     window.addEventListener("pointerdown", leave, { once: true });
@@ -43,6 +43,7 @@ export function IntroOverlay() {
     window.addEventListener("wheel", leave, { once: true, passive: true });
     window.addEventListener("touchmove", leave, { once: true, passive: true });
     return () => {
+      el?.removeEventListener("animationend", onEnd);
       window.clearTimeout(safety);
       window.clearTimeout(leaveTimer);
       window.removeEventListener("pointerdown", leave);
@@ -58,13 +59,13 @@ export function IntroOverlay() {
       <div className="relative flex flex-col items-center">
         <SpineDrawing draw className="intro-spine h-[34vh] max-h-80 w-auto text-bronze-light" />
         <p className="intro-name display mt-8 text-center text-[clamp(1.9rem,1rem+3.6vw,4rem)] tracking-[0.06em] text-bone">
-          {NAME.split("").map((c, i) => (
+          {name.toUpperCase().split("").map((c, i) => (
             <span key={i} style={{ ["--i" as string]: i }}>
               {c === " " ? " " : c}
             </span>
           ))}
         </p>
-        <p className="intro-sub caption-mono mt-4 text-[0.72rem] text-bronze-light">Ostéopathe D.O. — Creil</p>
+        <p className="intro-sub caption-mono mt-4 text-[0.72rem] text-bronze-light">{subtitle}</p>
       </div>
     </div>
   );

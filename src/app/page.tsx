@@ -10,15 +10,16 @@ import { SpineDrawing } from "@/components/shared/SpineDrawing";
 import { anatomyRegions } from "@/content/anatomy";
 import { photos } from "@/content/media";
 import { motifs } from "@/content/motifs";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { HeroStage } from "@/features/anatomy/components/HeroStage";
 import { hasValue } from "@/lib/facts";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Mohamed Merhi — Ostéopathe D.O. à Creil (60100)",
+  title: `${identity.name} — ${identity.title} à ${identity.city} (60100)`,
+  absolute: true,
   description:
-    "Ostéopathe à Creil : Mohamed Merhi vous reçoit pour un accompagnement personnalisé, attentif à votre mobilité et à votre confort. Motifs de consultation, cabinet, rendez-vous.",
+    `Ostéopathe à Creil : ${identity.name} vous reçoit pour un accompagnement personnalisé, attentif à votre mobilité et à votre confort. Motifs de consultation, cabinet, rendez-vous.`,
   path: "/",
 });
 
@@ -26,7 +27,7 @@ export default function HomePage() {
   const hours = practice.openingHours;
   return (
     <>
-      <IntroOverlay />
+      <IntroOverlay name={identity.name} subtitle={`${identity.title} — ${identity.city}`} />
       <HeroStage
         intro={
           <div className="w-full max-w-[110rem] lg:mx-auto">
@@ -38,7 +39,9 @@ export default function HomePage() {
               <h1 className="display line-rise mt-6 text-[clamp(2.6rem,1.2rem+4.6vw,7rem)] text-umber">
                 <Lines lines={["Le mouvement", <>est au cœur de</>, <>votre <em>équilibre.</em></>]} />
               </h1>
-              <p className="mt-7 font-display text-[clamp(1.15rem,1rem+0.5vw,1.5rem)] text-ink">Mohamed Merhi — Ostéopathe D.O. à Creil</p>
+              <p className="mt-7 font-display text-[clamp(1.15rem,1rem+0.5vw,1.5rem)] text-ink">
+                {identity.name} — {identity.title} à {identity.city}
+              </p>
               <p className="prose-atlas mt-3 max-w-md">Un accompagnement personnalisé, attentif à votre mobilité et à votre confort.</p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <BookingButton />
@@ -97,7 +100,7 @@ export default function HomePage() {
                 Une écoute attentive, <em>une approche précise.</em>
               </h2>
               <p className="prose-atlas mt-7 max-w-xl">
-                Chaque consultation commence par un échange. Mohamed Merhi prend le temps de comprendre votre contexte avant de proposer une
+                Chaque consultation commence par un échange. {identity.name} prend le temps de comprendre votre contexte avant de proposer une
                 approche manuelle adaptée — et vous oriente vers un médecin lorsque la situation le nécessite.
               </p>
               <Link href="/osteopathe" className="link-atlas mt-8 inline-block font-medium text-umber">

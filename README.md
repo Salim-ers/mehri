@@ -42,6 +42,7 @@ npm run dev                  # http://localhost:3000
 | `npm run lint` | ESLint (config Next.js + React Compiler rules) |
 | `npm run test` | Tests unitaires (contenu, réservation, contrastes, modèles 3D) |
 | `npm run test:e2e` | Playwright (desktop + mobile, responsive 320 → 3840 px, axe) — nécessite un build |
+| `prebuild` (automatique) | Refuse un build de **production** si des données client ne sont pas confirmées |
 | `npm run check:content` | **Garde-fou de publication** : échoue s'il reste des données client non confirmées |
 | `npm run check:content:report` | Même rapport, sans échec |
 | `npm run verify` | typecheck + lint + tests + build |

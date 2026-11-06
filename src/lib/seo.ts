@@ -1,22 +1,31 @@
 import type { Metadata } from "next";
-import { practice, siteUrl } from "@/content/practice";
+import { identity, practice, siteUrl } from "@/content/practice";
 import { formatAddress } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
 
-export const SITE_NAME = "Mohamed Merhi — Ostéopathe D.O. à Creil";
+export const SITE_NAME = `${identity.name} — ${identity.title} à ${identity.city}`;
+
+/** Indexation uniquement en production (Vercel) ou sur demande explicite. */
+export function isIndexable(): boolean {
+  return process.env.VERCEL_ENV ? process.env.VERCEL_ENV === "production" : process.env.ALLOW_INDEXING === "true";
+}
+
+const DEFAULT_OG_IMAGE = "/opengraph-image.jpg";
 
 interface PageMetaInput {
   readonly title: string;
   readonly description: string;
   readonly path: string;
   readonly image?: string;
+  /** titre complet, sans le gabarit du layout (accueil) */
+  readonly absolute?: boolean;
 }
 
 /** Métadonnées uniques par page : title, description, canonical, Open Graph. */
-export function pageMetadata({ title, description, path, image }: PageMetaInput): Metadata {
+export function pageMetadata({ title, description, path, image, absolute = false }: PageMetaInput): Metadata {
   const url = `${siteUrl}${path === "/" ? "" : path}`;
   return {
-    title,
+    title: absolute ? { absolute: title } : title,
     description,
     alternates: { canonical: url },
     openGraph: {
@@ -26,9 +35,9 @@ export function pageMetadata({ title, description, path, image }: PageMetaInput)
       siteName: SITE_NAME,
       title,
       description,
-      ...(image ? { images: [{ url: image }] } : {}),
+      images: [{ url: image ?? DEFAULT_OG_IMAGE }],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [image ?? DEFAULT_OG_IMAGE] },
   };
 }
 
@@ -72,7 +81,7 @@ export function practiceJsonLd(): JsonLd {
 }
 
 export function practitionerJsonLd(): JsonLd {
-  const name = hasValue(practice.practitionerName) ? practice.practitionerName.value : "Mohamed Merhi";
+  const name = identity.name;
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -95,18 +104,6 @@ export function breadcrumbJsonLd(items: readonly { name: string; path: string }[
       position: i + 1,
       name: item.name,
       item: `${siteUrl}${item.path === "/" ? "" : item.path}`,
-    })),
-  };
-}
-
-export function faqJsonLd(entries: readonly { question: string; answer: string }[]): JsonLd {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: entries.map((e) => ({
-      "@type": "Question",
-      name: e.question,
-      acceptedAnswer: { "@type": "Answer", text: e.answer },
     })),
   };
 }

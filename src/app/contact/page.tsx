@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { PhoneIcon, RouteIcon } from "@/components/shared/BookingButton";
+import { PhoneIcon, RouteIcon } from "@/components/shared/Icons";
 import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { MapEmbed } from "@/features/contact/MapEmbed";
 import { directionLinks, formatAddress, telHref } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
@@ -12,7 +12,7 @@ import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Contact et accès — cabinet d'ostéopathie à Creil",
   description:
-    "Adresse, téléphone, itinéraire et informations pratiques du cabinet d'ostéopathie de Mohamed Merhi à Creil (60100).",
+    `Adresse, téléphone, itinéraire et informations pratiques du cabinet d'ostéopathie de ${identity.name} à ${identity.city} (60100).`,
   path: "/contact",
 });
 
@@ -104,7 +104,6 @@ export default function ContactPage() {
                   ))}
                 </dl>
               ) : null}
-              <p className="mt-3 text-sm text-ink-soft">Consultations sur rendez-vous.</p>
             </Reveal>
 
             {hasValue(practice.accessibility) ? (

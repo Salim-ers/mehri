@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { identity } from "@/content/practice";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Mohamed Merhi — Ostéopathe D.O. à Creil",
-    short_name: "M. Merhi Ostéo",
+    name: `${identity.name} — ${identity.title} à ${identity.city}`,
+    short_name: identity.name,
     start_url: "/",
     display: "browser",
     background_color: "#F6F1E9",

@@ -4,7 +4,7 @@ import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
 import { PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
 import { galleryScenes } from "@/content/media";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { CabinetGallery } from "@/features/cabinet/CabinetGallery";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -12,7 +12,7 @@ import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Le cabinet d'ostéopathie à Creil",
   description:
-    "Découvrez en images le cabinet d'ostéopathie de Mohamed Merhi à Creil : salle de consultation lumineuse, tables de soins, bureau et modèles anatomiques.",
+    `Découvrez en images le cabinet d'ostéopathie de ${identity.name} à ${identity.city} : salle de consultation lumineuse, tables de soins, bureau et modèles anatomiques.`,
   path: "/cabinet",
   image: "/images/salle-consultation.jpg",
 });

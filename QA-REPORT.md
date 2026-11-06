@@ -8,14 +8,14 @@ Date : 6 novembre 2026 · Build : Next.js 16.4.5 · Environnement : conteneur Li
 |---|---|---|
 | TypeScript strict | `npm run typecheck` | ✅ 0 erreur |
 | ESLint (Next + règles React Compiler) | `npm run lint` | ✅ 0 erreur, 0 avertissement |
-| Tests unitaires | `npm run test` | ✅ 44/44 |
+| Tests unitaires | `npm run test` | ✅ 55/55 |
 | Build de production | `npm run build` | ✅ 28 routes prérendues (statique / PPR) |
 | Tests end-to-end | `npm run test:e2e` | ✅ 91/91 (desktop 1440 px + mobile Pixel 7) |
 | Accessibilité axe-core WCAG 2.2 A/AA | inclus e2e | ✅ 0 violation *serious/critical* sur les 12 pages |
 | Garde-fou contenu | `npm run check:content` | ⛔ **échoue volontairement** : 40 données obligatoires à confirmer (voir CLIENT-VALIDATION.md) |
 
 ### Couverture des tests unitaires
-Règles de réservation (URL en ligne confirmée/HTTPS seulement, repli téléphone, puis contact) · liens `tel:` et itinéraires · collecte des données non confirmées · intégrité du contenu (pages, slugs, régions ↔ motifs, photos existantes, dimensions réelles) · **conformité éditoriale santé** (aucune promesse de guérison/résultat, pas de « docteur », pas de nourrissons/grossesse, pas de témoignages) · JSON-LD (échappement, horaires non confirmés non publiés) · contrastes WCAG des couples de couleurs + cohérence tokens/CSS · modèle 3D (7 C/12 T/5 L, longueur, courbures, géométries finies, squelette dans une enveloppe humaine, retour exact au repos après animation, découpage narratif).
+**Frontière serveur/client** (les notes internes de `practice.ts` ne peuvent pas atteindre le JavaScript public ; contrôle complémentaire sur `.next/static` : aucune occurrence) · aucune identité du praticien écrite en dur dans les composants · Règles de réservation (URL en ligne confirmée/HTTPS seulement, repli téléphone, puis contact) · liens `tel:` et itinéraires · collecte des données non confirmées · intégrité du contenu (pages, slugs, régions ↔ motifs, photos existantes, dimensions réelles) · **conformité éditoriale santé** (aucune promesse de guérison/résultat, pas de « docteur », pas de nourrissons/grossesse, pas de témoignages) · JSON-LD (échappement, horaires non confirmés non publiés) · contrastes WCAG des couples de couleurs + cohérence tokens/CSS · modèle 3D (7 C/12 T/5 L, longueur, courbures, géométries finies, squelette dans une enveloppe humaine, retour exact au repos après animation, découpage narratif).
 
 ### Couverture end-to-end
 Chargement 200 + H1 unique + titre/canonical uniques + 0 erreur console sur 12 pages · menu `<dialog>` (Échap, retour du focus, navigation) · 404 réelles (page et fiche inconnue) · écran d'ouverture (affichage, disparition automatique, fermeture à l'interaction, non rejoué dans la session, mouvement réduit) · CTA → page RDV → `tel:+33679025027`, aucune fausse disponibilité · itinéraires Google/Waze, plan chargé **seulement après clic** · atlas : sélection clavier, URL `?region=` partageable, lien vers le motif, canvas 3D monté, pause, version sans WebGL utilisable, texte complet indexable · accueil : colonne 3D montée, défilement jamais bloqué, **repli automatique sur rendu logiciel** · en-têtes de sécurité (CSP sans `unsafe-eval`, nosniff, referrer, pas de `x-powered-by`) · sitemap (19 URL) / robots · **aucun débordement horizontal à 320, 375, 390, 430, 768, 1024, 1280, 1440, 1920, 2560 et 3840 px** sur toutes les pages · barre d'action mobile (visible < 1024 px, cibles ≥ 44 px, ne masque pas le pied de page) · paysage mobile.
@@ -47,7 +47,18 @@ Vérifié : en-têtes (test e2e), absence de secret (aucun n'est nécessaire), a
 
 ## 4. Revue critique (seconde lecture)
 
-Une seconde analyse du code a été réalisée par un agent distinct n'ayant pas écrit le code (voir section 6). **Ce n'est pas un audit indépendant** au sens du Quality Gate : même famille d'IA. Un audit humain est recommandé avant mise en production.
+Une seconde analyse du code a été réalisée par un agent distinct n'ayant pas écrit le code. **Ce n'est pas un audit indépendant** au sens du Quality Gate : même famille d'IA. Un audit humain est recommandé avant mise en production.
+
+Problèmes relevés puis **corrigés et re-testés** :
+- 🔴 Notes internes (sources, remarques SIRENE, « retouches IA ») embarquées dans le JavaScript public via un import partagé → icônes isolées, test de graphe d'imports, vérification du build.
+- 🔴 Garde-fou contenu contournable par le déploiement Git de Vercel → `prebuild` bloquant en production.
+- 🔴 Identité (« Mohamed Merhi », « Ostéopathe D.O. ») écrite en dur et phrase non vérifiée sur le diplôme → dérivée des faits, phrase supprimée.
+- 🟠 Publics (sportifs, seniors) présentés sans confirmation → badges de validation liés à `practice.publics` ; affirmations non confirmées retirées (« il vous rappellera », « sur rendez-vous »).
+- 🟠 Fuite mémoire GPU lors d'une reconstruction de scène → modèle retiré de la scène avant libération.
+- 🟠 Animations sans contrôle de pause (fiches, accueil, CSS infinies) → boutons pause, animations CSS bornées.
+- 🟠 Textes de l'accueil retirés de l'arbre d'accessibilité / invisibles sans JS → opacité seule, affichage au focus clavier, lecture séquentielle sans JS.
+- 🟠 Pages sans image Open Graph, préproductions marquées indexables, piège de défilement tactile sur l'atlas → corrigés.
+- 🟡 Proxy en 500 sur URL mal encodée (→ 404), titres dupliqués, région « live » trop verbeuse, `host` de robots, zones de sécurité (encoche), hauteur de la barre mobile, politique de confidentialité (responsable, transfert hors UE), iframe Maps (`sandbox`, referrer), dénomination « table de décompression » retirée, fils d'Ariane des pages légales.
 
 ## 5. Tableau d'acceptation
 
@@ -62,7 +73,7 @@ Une seconde analyse du code a été réalisée par un agent distinct n'ayant pas
 | Motion | ✅ Validé | Non bloquant, mouvement réduit, pause des animations, repli sans GPU |
 | SEO | 🟡 Partiellement validé | Fondations complètes ; domaine, Search Console et fiche Google à finaliser |
 | Performance | 🟡 Partiellement validé | Mesures labo correctes ; données terrain et fps sur appareils réels à obtenir |
-| Tests | ✅ Validé | 44 unitaires + 91 e2e exécutés et réussis |
+| Tests | ✅ Validé | 55 unitaires + 91 e2e exécutés et réussis (après corrections de la revue) |
 | Documentation | ✅ Validé | README, ARCHITECTURE, DEPLOYMENT, CLAUDE.md, CLIENT-VALIDATION |
 | Déploiement | 🔴 À finaliser | Bloqué tant que les données client ne sont pas confirmées (`check:content`) |
 

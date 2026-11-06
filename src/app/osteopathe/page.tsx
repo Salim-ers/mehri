@@ -4,15 +4,15 @@ import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
 import { photos } from "@/content/media";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { approach, approachValidation } from "@/content/practitioner";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Votre ostéopathe — Mohamed Merhi",
+  title: "Votre ostéopathe",
   description:
-    "Mohamed Merhi, ostéopathe D.O. à Creil : son approche du patient, sa manière de conduire les consultations et sa philosophie professionnelle.",
+    `${identity.name}, ${identity.title} à ${identity.city} : son approche du patient, sa manière de conduire les consultations et sa philosophie professionnelle.`,
   path: "/osteopathe",
   image: "/images/praticien-portrait.jpg",
 });
@@ -30,10 +30,10 @@ export default function OsteopathePage() {
       <PlateHeader
         plate="I"
         latin="Ars manualis"
-        title={<Lines lines={["Mohamed Merhi,", <><em>ostéopathe</em> D.O.</>]} />}
+        title={<Lines lines={[`${identity.name},`, <><em>{identity.title.toLowerCase()}</em></>]} />}
         lede={
           <p>
-            Au cabinet de Creil, Mohamed Merhi accompagne ses patients avec une approche manuelle, attentive et expliquée.{" "}
+            Au cabinet de {identity.city}, {identity.name} accompagne ses patients avec une approche manuelle, attentive et expliquée.{" "}
             <PendingBadge fact={practice.practitionerName} />
           </p>
         }
@@ -99,12 +99,9 @@ export default function OsteopathePage() {
             <Reveal>
               <p className="caption-mono text-bronze-ink">Parcours et formation</p>
               <h2 id="parcours" className="display mt-5 text-[clamp(2rem,1.2rem+2.6vw,3.8rem)] text-umber">
-                Ostéopathe <em>D.O.</em>
+                Parcours <em>et formation</em>
               </h2>
-              <p className="prose-atlas mt-6 max-w-md">
-                Le titre D.O. (diplômé en ostéopathie) atteste d&apos;une formation en ostéopathie. Le détail du parcours est présenté ci-dessous
-                une fois validé par le praticien.
-              </p>
+              <p className="prose-atlas mt-6 max-w-md">Seules les informations validées par le praticien sont présentées ici.</p>
             </Reveal>
             <div className="mt-8 space-y-4">
               {hasValue(background) ? <p className="prose-atlas">{background.value}</p> : <MissingSlot fact={background} />}

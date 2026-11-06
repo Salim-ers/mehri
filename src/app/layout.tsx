@@ -6,10 +6,10 @@ import { RouteTransition } from "@/components/layout/RouteTransition";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SpineProgress } from "@/components/layout/SpineProgress";
-import { practice, siteUrl } from "@/content/practice";
+import { identity, practice, siteUrl } from "@/content/practice";
 import { directionLinks, formatAddress, telHref } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
-import { practiceJsonLd, practitionerJsonLd, serializeJsonLd, SITE_NAME } from "@/lib/seo";
+import { isIndexable, practiceJsonLd, practitionerJsonLd, serializeJsonLd, SITE_NAME } from "@/lib/seo";
 import "./globals.css";
 
 const newsreader = localFont({
@@ -42,12 +42,13 @@ const plexMono = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: SITE_NAME, template: "%s · Mohamed Merhi, ostéopathe à Creil" },
+  title: { default: SITE_NAME, template: `%s · ${identity.name}, ostéopathe à ${identity.city}` },
   description:
-    "Cabinet d'ostéopathie de Mohamed Merhi, ostéopathe D.O. à Creil (60100) : consultations, motifs de consultation, déroulement d'une séance et prise de rendez-vous.",
-  applicationName: "Mohamed Merhi — Ostéopathe",
+    `Cabinet d'ostéopathie de ${identity.name}, ${identity.title} à ${identity.city} (60100) : consultations, motifs de consultation, déroulement d'une séance et prise de rendez-vous.`,
+  applicationName: `${identity.name} — ${identity.title}`,
   formatDetection: { telephone: false },
-  robots: { index: true, follow: true },
+  // préproductions : noindex (cohérent avec robots.txt)
+  robots: isIndexable() ? { index: true, follow: true } : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -58,7 +59,7 @@ export const viewport: Viewport = {
 };
 
 /** Exécuté avant le premier rendu : évite tout flash de l'écran d'ouverture déjà vu. */
-const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');try{var c=navigator.connection;if(sessionStorage.getItem('mm-intro-seen')||(c&&(c.saveData||/2g/.test(c.effectiveType||''))))d.dataset.intro='skip'}catch(e){}})();`;
+const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');try{var c=navigator.connection;if(sessionStorage.getItem('mm-intro-seen')||matchMedia('(prefers-reduced-motion: reduce)').matches||(c&&(c.saveData||/2g/.test(c.effectiveType||''))))d.dataset.intro='skip'}catch(e){}})();`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const phone = hasValue(practice.phone) ? practice.phone.value : null;
@@ -71,6 +72,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <SiteHeader
+          name={identity.name}
+          title={identity.title}
+          city={identity.city}
           phoneDisplay={phone?.display ?? null}
           phoneHref={phone ? telHref(phone.e164) : null}
           addressLine={address ? formatAddress(address) : null}

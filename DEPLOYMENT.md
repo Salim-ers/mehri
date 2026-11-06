@@ -20,7 +20,7 @@ Aucun secret n'est nécessaire. Les variables `NEXT_PUBLIC_*` et `robots.txt` so
 ## Procédure de publication
 
 1. Obtenir les validations listées dans `CLIENT-VALIDATION.md` et mettre à jour `src/content/*.ts` (`toConfirm(...)` → `confirmed(...)`).
-2. `npm run release:gate` doit réussir (typecheck, lint, tests, build, **contenu entièrement confirmé**).
+2. `npm run release:gate` doit réussir (typecheck, lint, tests, build, **contenu entièrement confirmé**). Sur Vercel, le script `prebuild` refuse de toute façon un build de production si une donnée n'est pas confirmée, si `NEXT_PUBLIC_SITE_URL` manque ou si `NEXT_PUBLIC_REVIEW_MODE` ≠ `false`.
 3. `npm run test:e2e` (après build) — 91 tests.
 4. Fusion sur `main` → la CI rejoue `verify` puis `release-gate` ; Vercel déploie.
 5. Contrôles post-déploiement : pages en 200, `/robots.txt` autorise l'indexation, `/sitemap.xml`, en-têtes de sécurité (`curl -I`), appel `tel:` sur mobile, itinéraire, Search Console (soumettre le sitemap), Google Business Profile cohérent (adresse, téléphone, horaires).

@@ -19,6 +19,19 @@ const pending = collectPending({
 });
 
 const reportOnly = process.argv.includes("--report");
+
+// « prebuild » : ne bloque que les builds de PRODUCTION (Vercel ou RELEASE_GATE=1)
+if (process.argv.includes("--if-production")) {
+  const production = process.env.VERCEL_ENV === "production" || process.env.RELEASE_GATE === "1";
+  if (!production) process.exit(0);
+  const problems: string[] = [];
+  if (!process.env.NEXT_PUBLIC_SITE_URL) problems.push("NEXT_PUBLIC_SITE_URL n'est pas défini (domaine définitif requis).");
+  if (process.env.NEXT_PUBLIC_REVIEW_MODE !== "false") problems.push("NEXT_PUBLIC_REVIEW_MODE doit valoir \"false\" en production.");
+  if (problems.length) {
+    for (const p of problems) console.error(`✗ ${p}`);
+    process.exit(1);
+  }
+}
 const blocking = pending.filter((p) => !p.optional);
 if (pending.length === 0) {
   console.log("✓ Toutes les données client sont confirmées.");

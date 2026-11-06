@@ -57,11 +57,9 @@ export const equipment: readonly Equipment[] = [
     index: "E·02",
     family: "Table segmentée",
     observed: "Table rouge à segments indépendants, équipée de poignées verticales.",
-    name: toConfirm(
-      "Table de décompression",
-      "Dénomination proposée par le brief",
-      "Confirmer le nom exact, la marque, le modèle et l'usage réel de cette table.",
-    ),
+    // le brief propose « table de décompression » : dénomination non reprise tant qu'elle
+    // n'est pas confirmée (elle suggère un effet thérapeutique)
+    name: missing("Confirmer le nom exact, la marque et le modèle de cette table (le brief évoque une « table de décompression »)."),
     usage: missing("Décrire l'usage réel de cette table en consultation."),
     role: missing("Préciser son rôle éventuel dans la consultation."),
     photo: photos.tables,

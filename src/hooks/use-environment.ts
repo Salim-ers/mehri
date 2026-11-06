@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type RefObject } from "react";
 
 function subscribeMedia(query: string) {
   return (callback: () => void) => {
@@ -11,8 +11,9 @@ function subscribeMedia(query: string) {
 }
 
 export function useMediaQuery(query: string, serverValue = false): boolean {
+  const subscribe = useCallback((cb: () => void) => subscribeMedia(query)(cb), [query]);
   return useSyncExternalStore(
-    subscribeMedia(query),
+    subscribe,
     () => window.matchMedia(query).matches,
     () => serverValue,
   );

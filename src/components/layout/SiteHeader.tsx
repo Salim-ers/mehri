@@ -7,6 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { navigation } from "@/content/site";
 
 interface SiteHeaderProps {
+  readonly name: string;
+  readonly title: string;
+  readonly city: string;
   readonly phoneDisplay: string | null;
   readonly phoneHref: string | null;
   readonly addressLine: string | null;
@@ -17,7 +20,7 @@ interface SiteHeaderProps {
  * rendez-vous et « Index de l'atlas » (menu plein écran, <dialog> natif :
  * piège de focus, Échap, retour du focus).
  */
-export function SiteHeader({ phoneDisplay, phoneHref, addressLine }: SiteHeaderProps) {
+export function SiteHeader({ name, title, city, phoneDisplay, phoneHref, addressLine }: SiteHeaderProps) {
   const pathname = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
@@ -59,8 +62,10 @@ export function SiteHeader({ phoneDisplay, phoneHref, addressLine }: SiteHeaderP
           <Link href="/" className="group flex items-center gap-3">
             <Image src="/images/monogramme.png" alt="" width={44} height={43} className="h-10 w-auto transition-transform duration-700 group-hover:rotate-[-6deg]" priority />
             <span className="flex flex-col whitespace-nowrap leading-none">
-              <span className="font-display text-[1.05rem] tracking-[-0.01em] text-umber sm:text-[1.15rem]">Mohamed Merhi</span>
-              <span className="caption-mono mt-1 text-[0.6rem] text-ink-soft">Ostéopathe D.O. · Creil</span>
+              <span className="font-display text-[1.05rem] tracking-[-0.01em] text-umber sm:text-[1.15rem]">{name}</span>
+              <span className="caption-mono mt-1 text-[0.6rem] text-ink-soft">
+                {title} · {city}
+              </span>
               <span className="sr-only"> — retour à l&apos;accueil</span>
             </span>
           </Link>

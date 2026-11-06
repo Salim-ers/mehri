@@ -1,13 +1,13 @@
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { PlateHeader } from "@/components/shared/PlateHeader";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { formatAddress } from "@/lib/contact-links";
 import { hasValue, type Fact } from "@/lib/facts";
-import { pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Mentions légales",
-  description: "Mentions légales du site du cabinet d'ostéopathie de Mohamed Merhi à Creil.",
+  description: `Mentions légales du site du cabinet d'ostéopathie de ${identity.name} à ${identity.city}.`,
   path: "/mentions-legales",
 });
 
@@ -24,6 +24,10 @@ export default function MentionsLegalesPage() {
   const address = hasValue(practice.address) ? formatAddress(practice.address.value) : null;
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Mentions légales", path: "/mentions-legales" }])) }}
+      />
       <PlateHeader plate="—" latin="Notitia legalis" title="Mentions légales" />
       <div className="px-[var(--gutter)] pb-24">
         <div className="mx-auto max-w-4xl space-y-14">

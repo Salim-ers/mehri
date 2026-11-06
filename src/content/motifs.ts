@@ -18,6 +18,8 @@ export interface Motif {
   readonly situations: readonly string[];
   readonly session: readonly string[];
   readonly caution: readonly string[];
+  /** fiche qui suppose un public pris en charge (practice.publics doit le confirmer) */
+  readonly dependsOnPublics?: boolean;
 }
 
 export const motifsValidation: Fact<boolean> = toConfirm(
@@ -171,6 +173,7 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "consultation-de-sportifs",
+    dependsOnPublics: true,
     number: "06",
     title: "Consultation de sportifs",
     shortTitle: "Sportifs",
@@ -199,6 +202,7 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "accompagnement-selon-l-age",
+    dependsOnPublics: true,
     number: "07",
     title: "Accompagnement adapté à différents âges",
     shortTitle: "Selon l'âge",

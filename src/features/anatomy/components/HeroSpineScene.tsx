@@ -15,11 +15,13 @@ export interface HeroSpineSceneProps {
   readonly active: boolean;
   /** décalage horizontal de la colonne (composition asymétrique) */
   readonly offsetX: number;
+  /** flottement suspendu par l'utilisateur */
+  readonly paused: boolean;
   /** légendes DOM positionnées par projection (évite un second arbre React) */
   readonly labels: { readonly cervical: RefObject<HTMLDivElement | null>; readonly lumbar: RefObject<HTMLDivElement | null> };
 }
 
-function SpineRig({ progress, detail, reducedMotion, offsetX, labels }: Omit<HeroSpineSceneProps, "active">) {
+function SpineRig({ progress, detail, reducedMotion, offsetX, labels, paused }: Omit<HeroSpineSceneProps, "active">) {
   const [controller, setController] = useState<HeroSpineController | null>(null);
   useEffect(() => {
     const abort = new AbortController();
@@ -34,6 +36,8 @@ function SpineRig({ progress, detail, reducedMotion, offsetX, labels }: Omit<Her
       });
     return () => {
       abort.abort();
+      // retire d'abord le modèle de la scène, puis libère la mémoire GPU
+      setController(null);
       built?.dispose();
     };
   }, [detail, reducedMotion, offsetX]);
@@ -44,6 +48,7 @@ function SpineRig({ progress, detail, reducedMotion, offsetX, labels }: Omit<Her
       elapsed: state.clock.elapsedTime,
       delta,
       progress: progress.current ?? 0,
+      paused,
       pointer: state.pointer,
       camera: state.camera,
       viewport: state.size,

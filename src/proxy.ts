@@ -8,8 +8,14 @@ const KNOWN = new Set(motifs.map((m) => m.slug));
  * (et non une « soft 404 » en 200 due au rendu en flux), pour le SEO.
  */
 export function proxy(request: NextRequest) {
-  const slug = request.nextUrl.pathname.split("/")[2] ?? "";
-  if (!KNOWN.has(decodeURIComponent(slug))) {
+  const raw = request.nextUrl.pathname.split("/")[2] ?? "";
+  let slug = "";
+  try {
+    slug = decodeURIComponent(raw);
+  } catch {
+    // encodage invalide : traité comme une fiche inconnue (404, pas 500)
+  }
+  if (!KNOWN.has(slug)) {
     return NextResponse.rewrite(new URL("/__fiche-introuvable", request.url), { status: 404 });
   }
   return NextResponse.next();

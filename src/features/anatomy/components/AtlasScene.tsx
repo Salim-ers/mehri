@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { getRegion, type RegionId } from "@/content/anatomy";
 import { applyRegionHighlight, captureMaterials } from "../model/highlight";
 import { createAnatomyMaterials } from "../model/materials";
+import { configureTouchOrbit } from "../model/touch";
 import { SkeletonAnimator } from "../model/motion";
 import { createSkeletonAsync, type SkeletonModel } from "../model/skeleton";
 import type { Detail } from "../model/vertebra-geometry";
@@ -44,12 +45,20 @@ function Skeleton({ selected, playing, onSelect, onHover, detail, interactive = 
       });
     return () => {
       abort.abort();
+      // retire d'abord le modèle de la scène, puis libère la mémoire GPU
+      setModel(null);
       if (built) for (const g of built.geometries) g.dispose();
     };
   }, [detail, materials]);
   const animator = useMemo(() => (model ? new SkeletonAnimator(model) : null), [model]);
+  const canvas = useThree((st) => st.gl.domElement);
+
   const controls = useRef<CameraControls>(null);
   const hovered = useRef<RegionId | null>(null);
+  // écrans tactiles : défilement à un doigt, rotation à deux doigts
+  useEffect(() => {
+    if (controls.current && window.matchMedia("(pointer: coarse)").matches) configureTouchOrbit(controls.current, canvas);
+  }, [model, canvas]);
   const size = useThree((st) => st.size);
   // cadrages plus larges sur les scènes étroites (portrait, colonne de mise en page)
   const aspect = size.width / Math.max(1, size.height);

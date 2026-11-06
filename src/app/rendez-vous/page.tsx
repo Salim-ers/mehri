@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { bookingAction, BookingButton, PhoneIcon } from "@/components/shared/BookingButton";
+import { bookingAction, BookingButton } from "@/components/shared/BookingButton";
+import { PhoneIcon } from "@/components/shared/Icons";
 import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
 import { SpineDrawing } from "@/components/shared/SpineDrawing";
-import { practice, reviewMode } from "@/content/practice";
+import { identity, practice, reviewMode } from "@/content/practice";
 import { formatAddress, telHref } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Prendre rendez-vous — ostéopathe à Creil",
-  description: "Prendre rendez-vous avec Mohamed Merhi, ostéopathe D.O. à Creil : modalités, horaires et informations pratiques.",
+  description: `Prendre rendez-vous avec ${identity.name}, ${identity.title} à ${identity.city} : modalités, horaires et informations pratiques.`,
   path: "/rendez-vous",
 });
 
@@ -51,7 +52,7 @@ export default function RendezVousPage() {
             <p className="mt-8 max-w-lg text-sm text-bone/70">
               {online
                 ? "Vous serez redirigé vers la plateforme de réservation du cabinet."
-                : "Si le praticien est en consultation, laissez un message : il vous rappellera. Aucun créneau n'est affiché ici tant qu'un agenda en ligne n'a pas été mis en place par le cabinet."}
+                : "Aucun créneau n'est affiché ici tant qu'un agenda en ligne n'a pas été mis en place par le cabinet."}
             </p>
             <SpineDrawing className="pointer-events-none absolute -bottom-10 right-4 hidden h-[115%] w-auto text-bone/[0.07] md:block" />
           </div>

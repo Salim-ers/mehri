@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PendingBadge } from "@/components/shared/Pending";
-import { practice } from "@/content/practice";
+import { identity, practice } from "@/content/practice";
 import { navigation } from "@/content/site";
 import { formatAddress, telHref } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
@@ -71,7 +71,7 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-bone/10 pt-6 text-[0.8rem] text-bone/60 md:flex-row md:items-center md:justify-between">
           <p>
-            © 2026 {hasValue(practice.practitionerName) ? practice.practitionerName.value : "Cabinet"} — Ostéopathe D.O.
+            © 2026 {identity.name} — {identity.title}
             {address ? ` · ${formatAddress(address)}` : ""}
           </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">

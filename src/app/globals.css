@@ -33,7 +33,7 @@
 
 @layer base {
   :root {
-    --gutter: clamp(1rem, 0.4rem + 2.6vw, 3.5rem);
+    --gutter: max(clamp(1rem, 0.4rem + 2.6vw, 3.5rem), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
     --header-h: 4.25rem;
     --actionbar-h: 0px;
     color-scheme: light;
@@ -41,7 +41,7 @@
 
   @media (max-width: 1023px) {
     :root {
-      --actionbar-h: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+      --actionbar-h: calc(4.25rem + env(safe-area-inset-bottom, 0px));
     }
   }
 
@@ -580,25 +580,36 @@
     align-items: flex-end;
     padding: calc(var(--header-h) + 1rem) var(--gutter) calc(2rem + var(--actionbar-h));
     opacity: 0;
-    visibility: hidden;
     transform: translate3d(0, 24px, 0);
     pointer-events: none;
     transition:
       opacity 0.8s var(--ease-atlas),
-      transform 1s var(--ease-atlas),
-      visibility 0s linear 0.8s;
+      transform 1s var(--ease-atlas);
   }
-  .hero-beat.is-on {
+  /* temps actif, ou atteint au clavier : visible et interactif */
+  .hero-beat.is-on,
+  .hero-beat:focus-within {
     opacity: 1;
-    visibility: visible;
     transform: none;
-    transition:
-      opacity 0.8s var(--ease-atlas),
-      transform 1s var(--ease-atlas),
-      visibility 0s;
+    z-index: 6;
   }
-  .hero-beat.is-on > * {
+  .hero-beat.is-on > *,
+  .hero-beat:focus-within > * {
     pointer-events: auto;
+  }
+  /* sans JavaScript : les trois temps se lisent l'un après l'autre */
+  html:not(.js) .hero-stage {
+    height: auto;
+  }
+  html:not(.js) .hero-stage > div {
+    position: relative;
+    height: auto;
+  }
+  html:not(.js) .hero-beat {
+    position: relative;
+    opacity: 1;
+    transform: none;
+    min-height: 70vh;
   }
   /* lisibilité sur mobile : voile ivoire sous le texte */
   @media (max-width: 1023px) {
@@ -677,7 +688,7 @@
     inset: 0;
     background: var(--color-bronze-ink);
     transform: translateY(-100%);
-    animation: cue 2.2s var(--ease-swift) infinite;
+    animation: cue 2.2s var(--ease-swift) 4;
   }
   @keyframes cue {
     60%,
@@ -687,7 +698,8 @@
   }
 
   .table-segment {
-    animation: segment 4.8s var(--ease-swift) infinite;
+    /* 3 cycles puis arrêt (WCAG 2.2.2) */
+    animation: segment 4.8s var(--ease-swift) 3;
     animation-delay: calc(var(--i) * 0.35s);
   }
   @keyframes segment {

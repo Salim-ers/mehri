@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarIcon, PhoneIcon, RouteIcon } from "@/components/shared/BookingButton";
+import { CalendarIcon, PhoneIcon, RouteIcon } from "@/components/shared/Icons";
 
 interface MobileActionBarProps {
   readonly phoneHref: string | null;

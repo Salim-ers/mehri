@@ -15,6 +15,8 @@ export interface HeroFrameInput {
   readonly elapsed: number;
   readonly delta: number;
   readonly progress: number;
+  /** flottement et parallaxe suspendus par l'utilisateur (WCAG 2.2.2) */
+  readonly paused: boolean;
   readonly pointer: THREE.Vector2;
   readonly camera: THREE.Camera;
   readonly viewport: { readonly width: number; readonly height: number };
@@ -109,10 +111,11 @@ export class HeroSpineController {
 
     // 3. flottement + parallaxe souris (amplitude limitée)
     const k = 1 - Math.pow(0.0015, delta);
-    const float = this.reducedMotion ? 0 : Math.sin(elapsed * 0.45) * 0.08;
-    this.rig.rotation.y = THREE.MathUtils.lerp(this.rig.rotation.y, -0.95 + pointer.x * 0.22 + float + p * 0.9, k);
+    const calm = this.reducedMotion || input.paused;
+    const float = calm ? 0 : Math.sin(elapsed * 0.45) * 0.08;
+    this.rig.rotation.y = THREE.MathUtils.lerp(this.rig.rotation.y, -0.95 + (input.paused ? 0 : pointer.x * 0.22) + float + p * 0.9, k);
     this.rig.rotation.x = THREE.MathUtils.lerp(this.rig.rotation.x, -pointer.y * 0.06, k);
-    this.rig.position.y = THREE.MathUtils.lerp(this.rig.position.y, this.reducedMotion ? 0 : Math.sin(elapsed * 0.6) * 0.06, k);
+    this.rig.position.y = THREE.MathUtils.lerp(this.rig.position.y, calm ? 0 : Math.sin(elapsed * 0.6) * 0.06, k);
 
     // 4. caméra : accompagne la structure vers la région commentée
     const step = stepForProgress(p);

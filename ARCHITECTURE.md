@@ -45,7 +45,9 @@ Chaque information du cabinet est un `Fact<T>` (`src/lib/facts.ts`) :
 - `to-confirm` : valeur candidate relevée sur une source publique (la source est tracée), affichée avec un badge en mode relecture ;
 - `missing` : jamais inventée ; un encart « À fournir » n'apparaît qu'en mode relecture.
 
-`npm run check:content` parcourt tout le contenu et **échoue** tant qu'une donnée obligatoire n'est pas confirmée → la CI bloque la production (job `release-gate`).
+`npm run check:content` parcourt tout le contenu et **échoue** tant qu'une donnée obligatoire n'est pas confirmée. Il est exécuté en **`prebuild`** : tout build de production (`VERCEL_ENV=production` ou `RELEASE_GATE=1`) échoue si une donnée n'est pas confirmée, si `NEXT_PUBLIC_SITE_URL` est absent ou si le mode relecture est actif. Les previews ne sont pas bloquées.
+
+`content/practice.ts` (qui contient les sources et questions internes) n'est **jamais** importé par un composant client : un test parcourt le graphe d'imports de chaque fichier `"use client"` et vérifie que ces notes ne partent pas dans le JavaScript public (vérifié aussi dans `.next/static`). L'identité affichée (`identity`) est dérivée des faits, jamais écrite en dur.
 
 ## Réservation
 
@@ -71,7 +73,8 @@ Modèle proposé : `services(id, label, duration_min, active)`, `opening_rules(w
 - **Une seule source de vérité** : le même profil génère la 3D et les dessins SVG (intro, transitions, version sans WebGL).
 - **Performance** : construction découpée en tranches de 8 ms (`scheduler.ts`, générateurs + `scheduler.yield`) → aucune tâche longue ; matériaux partagés ; niveau de détail `low` sur mobile/appareils modestes ; DPR plafonné ; `frameloop="never"` hors écran ; chargement après l'évènement `load` + inactivité ; libération des géométries et matériaux au démontage.
 - **Repli** : pas de WebGL, ou **rendu logiciel** (SwiftShader, llvmpipe…) → illustrations vectorielles, même contenu.
-- **Animations articulaires** (`motion.ts`) : rotations autour de pivots anatomiques (axe local ou axe monde de repos), amplitudes physiologiques, fondu entre démonstrations, bouton pause (WCAG 2.2.2), désactivées par défaut en mouvement réduit.
+- **Animations articulaires** (`motion.ts`) : rotations autour de pivots anatomiques (axe local ou axe monde de repos), amplitudes physiologiques, fondu entre démonstrations, bouton pause sur l'atlas, les fiches motifs et l'accueil (WCAG 2.2.2), désactivées par défaut en mouvement réduit. Animations CSS décoratives limitées à quelques cycles.
+- **Tactile** : sur écran tactile, un doigt fait défiler la page, deux doigts font pivoter le squelette (pas de piège de défilement).
 
 ## Motion design
 
@@ -82,7 +85,7 @@ Modèle proposé : `services(id, label, duration_min, active)`, `opening_rules(w
 
 ## SEO
 
-Métadonnées uniques par page, canonical, Open Graph (image 1200×630), sitemap (19 URL), robots (indexation uniquement sur `VERCEL_ENV=production` ou `ALLOW_INDEXING=true`), JSON-LD `MedicalBusiness` + `Person` + `BreadcrumbList` + `MedicalWebPage`. Les champs non confirmés (horaires) ne sont pas publiés dans Schema.org ; aucune note ou avis n'est publié. Tout le contenu de l'atlas existe en HTML (section « Les sept régions, en texte »).
+Métadonnées uniques par page, canonical, Open Graph (image 1200×630), sitemap (19 URL), robots (indexation uniquement sur `VERCEL_ENV=production` ou `ALLOW_INDEXING=true`), JSON-LD `MedicalBusiness` + `Person` + `BreadcrumbList` + `MedicalWebPage`. Les horaires ne sont publiés dans Schema.org qu'une fois confirmés ; adresse et téléphone (candidats concordants sur deux sources) le sont, la production restant bloquée tant qu'ils ne sont pas confirmés. Aucune note ni aucun avis n'est publié. Image Open Graph par défaut sur toutes les pages ; `noindex` sur les préproductions. Tout le contenu de l'atlas existe en HTML (section « Les sept régions, en texte »).
 
 ## Sécurité
 

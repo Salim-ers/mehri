@@ -16,7 +16,8 @@ export function MapEmbed({ src, title, address }: { src: string; title: string; 
           title={title}
           className="absolute inset-0 h-full w-full border-0 grayscale-[0.35] sepia-[0.15]"
           loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
+          referrerPolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           allowFullScreen
         />
       ) : (

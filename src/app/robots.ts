@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/content/practice";
+import { isIndexable } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   // Les environnements de préproduction ne doivent pas être indexés.
-  const isProduction = process.env.VERCEL_ENV ? process.env.VERCEL_ENV === "production" : process.env.ALLOW_INDEXING === "true";
+  const isProduction = isIndexable();
   return {
     rules: isProduction ? [{ userAgent: "*", allow: "/" }] : [{ userAgent: "*", disallow: "/" }],
     sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+    host: new URL(siteUrl).host,
   };
 }

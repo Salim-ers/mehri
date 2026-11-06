@@ -19,7 +19,7 @@ export function RouteTransition() {
       first.current = false;
       return;
     }
-    // remet la page en haut et annonce le changement aux lecteurs d'écran
+    // déclenche le balayage ; l'annonce du changement de page est assurée par le routeur Next.js
     setRun((r) => r + 1);
     const t = window.setTimeout(() => setRun(0), 900);
     return () => window.clearTimeout(t);

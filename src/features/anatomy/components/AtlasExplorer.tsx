@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { anatomyRegions, getRegion, isRegionId, type RegionId } from "@/content/anatomy";
 import { getMotif } from "@/content/motifs";
-import { useDeviceTier, useInView, useReducedMotion, useWebGLSupport } from "@/hooks/use-environment";
+import { useDeviceTier, useInView, useMediaQuery, useReducedMotion, useWebGLSupport } from "@/hooks/use-environment";
 import { BodyMap } from "./BodyMap";
 
 const AtlasScene = dynamic(() => import("./AtlasScene"), {
@@ -33,6 +33,7 @@ export function AtlasExplorer() {
   const webgl = useWebGLSupport();
   const tier = useDeviceTier();
   const reduced = useReducedMotion();
+  const coarse = useMediaQuery("(pointer: coarse)");
   const stage = useRef<HTMLDivElement>(null);
   const inView = useInView(stage);
   const params = useSearchParams();
@@ -63,6 +64,9 @@ export function AtlasExplorer() {
       <h2 id="atlas-stage-title" className="sr-only">
         Atlas anatomique interactif
       </h2>
+      <p className="sr-only" role="status" aria-live="polite">
+        {region ? `Région sélectionnée : ${region.label}` : "Vue d'ensemble du squelette"}
+      </p>
       <div className="mx-auto grid max-w-[120rem] grid-cols-12 lg:min-h-[100svh]">
         {/* Liste des régions */}
         <nav aria-label="Régions anatomiques" className="order-2 col-span-12 border-bone/10 px-[var(--gutter)] py-6 lg:order-1 lg:col-span-3 lg:border-r lg:py-14">
@@ -119,7 +123,7 @@ export function AtlasExplorer() {
           )}
           <div className="pointer-events-none absolute inset-x-[var(--gutter)] bottom-4 flex items-end justify-between gap-4">
             <p className="caption-mono text-bone/55">
-              {use3D ? (hovered ? `Région : ${LABELS[hovered]}` : "Glisser pour tourner · cliquer sur un os") : "Version vectorielle"}
+              {use3D ? (hovered ? `Région : ${LABELS[hovered]}` : coarse ? "Deux doigts pour tourner · toucher un os" : "Glisser pour tourner · cliquer sur un os") : "Version vectorielle"}
             </p>
             {region ? (
               <button
@@ -140,7 +144,7 @@ export function AtlasExplorer() {
         </div>
 
         {/* Panneau explicatif */}
-        <aside aria-live="polite" className="order-3 col-span-12 border-bone/10 px-[var(--gutter)] pb-14 pt-6 lg:col-span-4 lg:border-l lg:py-14">
+        <aside className="order-3 col-span-12 border-bone/10 px-[var(--gutter)] pb-14 pt-6 lg:col-span-4 lg:border-l lg:py-14">
           {region ? (
             <article key={region.id} className="atlas-panel">
               <p className="caption-mono text-bronze-light">

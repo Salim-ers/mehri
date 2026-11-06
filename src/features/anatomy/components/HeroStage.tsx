@@ -29,6 +29,7 @@ export function HeroStage({ intro, beats }: HeroStageProps) {
   const wide = useMediaQuery("(min-width: 1024px)", true);
   const inView = useInView(section, "0px");
   const [sceneReady, setSceneReady] = useState(false);
+  const [paused, setPaused] = useState(false);
   const cervicalLabel = useRef<HTMLDivElement>(null);
   const lumbarLabel = useRef<HTMLDivElement>(null);
 
@@ -94,6 +95,7 @@ export function HeroStage({ intro, beats }: HeroStageProps) {
                 reducedMotion={reduced}
                 active={inView}
                 offsetX={wide ? 0.4 : 0}
+                paused={paused}
                 labels={{ cervical: cervicalLabel, lumbar: lumbarLabel }}
               />
               <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -123,6 +125,17 @@ export function HeroStage({ intro, beats }: HeroStageProps) {
         <div className={`hero-beat hero-beat--side ${beat === 2 ? "is-on" : ""}`}>
           {beats[1]}
         </div>
+
+        {show3D && !reduced ? (
+          <button
+            type="button"
+            onClick={() => setPaused((p) => !p)}
+            aria-pressed={paused}
+            className="caption-mono absolute right-[var(--gutter)] top-[calc(var(--header-h)+0.75rem)] z-10 flex min-h-11 items-center gap-2 rounded-full border border-umber/20 bg-ivory/70 px-4 text-umber backdrop-blur hover:border-umber"
+          >
+            {paused ? "▶ Animer la colonne" : "❚❚ Pause"}
+          </button>
+        ) : null}
 
         {/* progression */}
         <ol className="pointer-events-none absolute bottom-6 right-[var(--gutter)] z-10 hidden items-center gap-3 lg:flex" aria-hidden="true">

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/motifs-de-consult
   const { slug } = await params;
   const motif = getMotif(slug);
   if (!motif) return {};
-  return pageMetadata({ title: `${motif.title} — ostéopathe à Creil`, description: motif.metaDescription, path: `/motifs-de-consultation/${motif.slug}` });
+  return pageMetadata({ title: motif.title, description: motif.metaDescription, path: `/motifs-de-consultation/${motif.slug}` });
 }
 
 export default async function MotifPage({ params }: PageProps<"/motifs-de-consultation/[slug]">) {
@@ -53,7 +53,6 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
               about: { "@type": "AnatomicalStructure", name: region.label },
               audience: { "@type": "Patient" },
               url: `${siteUrl}${path}`,
-              author: { "@id": `${siteUrl}/#praticien` },
             },
           ]),
         }}
@@ -78,6 +77,7 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
             <p className="mt-8 max-w-2xl font-display text-[clamp(1.2rem,1rem+0.7vw,1.7rem)] leading-snug text-ink">{motif.lede}</p>
             <p className="caption-mono mt-6 text-ink-soft">
               Région associée : {region.label} <PendingBadge fact={motifsValidation} />
+              {motif.dependsOnPublics ? <PendingBadge fact={practice.publics} className="ml-2" /> : null}
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
                   </li>
                 ))}
               </ol>
-              {motif.slug === "accompagnement-selon-l-age" ? (
+              {motif.dependsOnPublics ? (
                 <div className="mt-6">
                   {hasValue(practice.publics) ? (
                     <p className="prose-atlas">Publics accueillis au cabinet : {practice.publics.value.join(", ")}.</p>

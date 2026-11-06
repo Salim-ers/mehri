@@ -118,7 +118,17 @@ export const practice: Practice = {
   ),
 };
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.osteopathe-merhi-creil.fr").replace(/\/$/, "");
+/** Identité affichée partout : dérivée des faits (jamais de littéral ailleurs). */
+export const identity = {
+  name: practice.practitionerName.value ?? "Cabinet d'ostéopathie",
+  title: practice.title.value ?? "Ostéopathe",
+  city: practice.city.value ?? "Creil",
+} as const;
+
+/** Domaine : défaut provisoire, refusé en production par le garde-fou de build. */
+export const SITE_URL_FALLBACK = "https://www.osteopathe-merhi-creil.fr";
+
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL_FALLBACK).replace(/\/$/, "");
 
 /** Mode relecture : affiche les badges « À confirmer » pour la présentation au client. */
 export const reviewMode = process.env.NEXT_PUBLIC_REVIEW_MODE !== "false";
