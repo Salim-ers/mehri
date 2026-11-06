@@ -35,6 +35,20 @@ export function missing<T>(ask: string, options: { optional?: boolean } = {}): F
   return { value: null, status: "missing", ask, optional: options.optional };
 }
 
+/**
+ * Le praticien a décidé par écrit de ne pas publier cette donnée : rien n'est affiché
+ * (ni en production ni en relecture) et elle ne bloque plus la mise en production.
+ * `decision` trace la décision (date, support) — jamais affichée au public.
+ */
+export function notPublished<T>(decision: string): Fact<T> {
+  return { value: null, status: "confirmed", ask: decision };
+}
+
+/** Vrai si le praticien a choisi de ne pas publier la donnée. */
+export function isNotPublished(fact: Fact<unknown>): boolean {
+  return fact.status === "confirmed" && fact.value === null;
+}
+
 export function hasValue<T>(fact: Fact<T>): fact is Fact<T> & { value: T } {
   return fact.value !== null && fact.status !== "missing";
 }

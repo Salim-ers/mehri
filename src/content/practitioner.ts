@@ -1,16 +1,12 @@
-import { toConfirm, type Fact } from "@/lib/facts";
+import { confirmed, type Fact } from "@/lib/facts";
 
 /**
- * Textes de présentation du praticien. Rédaction de travail QuadCore :
+ * Textes de présentation du praticien. Rédaction QuadCore :
  * ils décrivent une manière de conduire la consultation conforme au cadre de
  * l'ostéopathie, sans revendiquer d'expérience, de diplôme ou de spécialité.
- * À relire et valider par Mohamed Merhi.
+ * « Validé » par le praticien dans le questionnaire du 06/11/2026.
  */
-export const approachValidation: Fact<boolean> = toConfirm(
-  true,
-  "Rédaction QuadCore",
-  "Relire et valider les textes de la page « Votre ostéopathe » (approche, principes, philosophie).",
-);
+export const approachValidation: Fact<boolean> = confirmed(true);
 
 export const approach = {
   statement: "Prendre le temps de comprendre avant d'agir.",

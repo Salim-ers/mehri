@@ -2,6 +2,17 @@
 
 Liste générée et tenue à jour par `npm run check:content:report` (source : `src/content/`). Recherches effectuées le 6 novembre 2026.
 
+## Validation du 6 novembre 2026
+
+Questionnaire rempli le 6 novembre 2026 ([document de validation](https://claude.ai/artifact/9xT397w4NcfU4ZgJn43BTF)). Les 41 données sont tranchées : `npm run check:content` passe.
+
+- **Validées et publiées :** nom, titre, adresse, téléphone, horaires, accessibilité, éditeur (QuadCore), hébergeur, photos et consentement, motifs, textes « Votre ostéopathe », page Équipements, fiches E·01 et E·06.
+- **« Ne pas afficher » (`notPublished`) :** e-mail, tarifs (le site indique qu'ils sont communiqués à la prise de rendez-vous), plateforme de réservation (rendez-vous par téléphone), fiche Crenolibre, diplômes, ADELI/RPPS, assureur.
+- **« Validé » sans valeur fournie, donc rien n'est affiché :** SIRET, publics pris en charge (ni nourrissons ni femmes enceintes), texte de parcours (le praticien demande qu'on en propose un), dénomination et usage des fiches E·02 à E·05 (seule l'observation est affichée).
+- **À compléter dès que possible :** SIRET, adresse et directeur de la publication de l'éditeur, éléments de parcours pour rédiger le texte proposé.
+
+Les sections suivantes gardent l'état initial pour mémoire.
+
 ## 1. Points d'attention prioritaires
 
 1. **Photographies retouchées par IA.** Les fichiers fournis s'appellent « Image ChatGPT… ». Avant publication, confirmer par écrit qu'il s'agit de retouches de *vraies* photos du cabinet, que le praticien, les équipements et les lieux n'ont pas été modifiés, et que le texte des affiches anatomiques (illisible) n'est pas un artefact gênant. Si une image a été générée, elle ne doit pas être présentée comme une photo réelle.

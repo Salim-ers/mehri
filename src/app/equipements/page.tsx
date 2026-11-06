@@ -6,7 +6,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { equipment, equipmentPageValidation, type Equipment } from "@/content/equipment";
 import { reviewMode } from "@/content/practice";
 import { TableIllustration } from "@/features/cabinet/TableIllustration";
-import { hasValue, type Fact } from "@/lib/facts";
+import { hasValue, isNotPublished, type Fact } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -18,7 +18,7 @@ export const metadata = pageMetadata({
 
 function FactRow({ label, fact }: { label: string; fact: Fact<string> }) {
   if (!hasValue(fact)) {
-    if (!reviewMode) return null;
+    if (!reviewMode || isNotPublished(fact)) return null;
     return (
       <div className="grid gap-2 border-t border-umber/12 py-4 sm:grid-cols-[9rem_1fr]">
         <dt className="caption-mono text-ink-soft">{label}</dt>

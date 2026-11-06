@@ -22,7 +22,8 @@ export function PendingBadge({ fact, className = "" }: { fact: Fact<unknown>; cl
  * avec la question à poser au praticien, absent en production.
  */
 export function MissingSlot({ fact, children }: { fact: Fact<unknown>; children?: ReactNode }) {
-  if (!reviewMode) return children ?? null;
+  // donnée confirmée sans valeur = le praticien a choisi de ne pas la publier : plus rien à demander
+  if (!reviewMode || fact.status === "confirmed") return children ?? null;
   return (
     <div className="rounded-md border border-dashed border-review/50 bg-review-bg/70 px-4 py-3 text-sm text-review">
       <p className="caption-mono mb-1">À fournir par le praticien</p>

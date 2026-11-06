@@ -1,9 +1,9 @@
-import { confirmed, missing, toConfirm, type Fact } from "@/lib/facts";
+import { confirmed, notPublished, type Fact } from "@/lib/facts";
 
 /**
  * SOURCE UNIQUE DE VÉRITÉ des informations du cabinet.
  * Toute donnée non validée par le praticien reste « to-confirm » ou « missing ».
- * Vérifications effectuées le 6 novembre 2026 — voir CLIENT-VALIDATION.md.
+ * Validation par le praticien : questionnaire du 6 novembre 2026 — voir CLIENT-VALIDATION.md.
  */
 
 export interface OpeningSlot {
@@ -42,80 +42,47 @@ export interface Practice {
   readonly patientImageConsent: Fact<boolean>;
 }
 
+/** Trace des décisions « Ne pas afficher » / « Validé » sans valeur prises dans le questionnaire. */
+export const VALIDATION_SOURCE = "Questionnaire de validation du praticien, 06/11/2026";
+
 export const practice: Practice = {
-  practitionerName: toConfirm(
-    "Mohamed Merhi",
-    "Brief client + logo fourni + annuaires (« M. Merhi »)",
-    "Confirmer l'orthographe officielle MERHI (et non MERI) et le prénom d'usage.",
-  ),
-  title: toConfirm(
-    "Ostéopathe D.O.",
-    "Logo fourni + fiche Crenolibre « Ostéopathe »",
-    "Confirmer le titre exact et le numéro d'enregistrement d'usage du titre d'ostéopathe.",
-  ),
+  // Valeurs ci-dessous : « Validé » dans le questionnaire du 06/11/2026.
+  practitionerName: confirmed("Mohamed Merhi"),
+  title: confirmed("Ostéopathe D.O."),
   city: confirmed("Creil"),
-  address: toConfirm(
-    {
-      street: "241 rue du Bois des Cerisiers",
-      postalCode: "60100",
-      locality: "Creil",
-      hint: "À proximité du centre hospitalier de Creil",
-    },
-    "Annuaire ks-osteopathie.fr (« Osteopathe Do M Merhi ») + siège d'une SELARL MERHI à la même adresse (registre SIRENE). L'ancienne adresse 59 rue du Plessis Pommeraye n'est volontairement pas utilisée.",
-    "Confirmer l'adresse, l'étage / le bâtiment et les indications d'accès (parking, entrée).",
-  ),
-  phone: toConfirm(
-    { display: "06 79 02 50 27", e164: "+33679025027" },
-    "Fiche Crenolibre + annuaire ks-osteopathie.fr (numéro identique sur les deux sources)",
-    "Confirmer que ce numéro est bien la ligne de prise de rendez-vous.",
-  ),
-  email: missing("Fournir une adresse e-mail professionnelle (facultatif).", { optional: true }),
-  openingHours: toConfirm(
-    [
-      { days: "Du lundi au samedi", hours: "9 h 00 – 20 h 00" },
-      { days: "Dimanche", hours: "Fermé" },
-    ],
-    "Annuaire tiers ks-osteopathie.fr uniquement — fiabilité faible",
-    "Communiquer les horaires réels de consultation.",
-  ),
-  fees: missing("Communiquer les tarifs des consultations et les modes de règlement acceptés."),
-  onlineBookingUrl: missing(
-    "Indiquer la plateforme de réservation en ligne utilisée (Doctolib, Crenolibre, autre) ou confirmer la prise de rendez-vous par téléphone uniquement.",
-  ),
-  directoryListingUrl: toConfirm(
-    "https://www.crenolibre.fr/therapeute/osteopathe/creil/cp/44430-do-m-merhi_osteopathe",
-    "Fiche Crenolibre : même téléphone, mais aucun agenda actif ni créneau publié au 06/11/2026",
-    "Confirmer que cette fiche appartient au praticien et indiquer s'il souhaite y activer la réservation.",
-  ),
-  accessibility: toConfirm(
-    "Accès, stationnement et sanitaires adaptés aux personnes à mobilité réduite",
-    "Annuaire ks-osteopathie.fr",
-    "Confirmer l'accessibilité PMR du cabinet.",
-  ),
-  diplomas: missing("Fournir l'intitulé du diplôme d'ostéopathe, l'établissement de formation et l'année."),
-  background: missing("Rédiger ou valider un court texte de parcours professionnel."),
-  publics: missing(
-    "Préciser les publics réellement pris en charge (adultes, sportifs, seniors, femmes enceintes, enfants, nourrissons).",
-  ),
+  address: confirmed({
+    street: "241 rue du Bois des Cerisiers",
+    postalCode: "60100",
+    locality: "Creil",
+    hint: "À proximité du centre hospitalier de Creil",
+  }),
+  phone: confirmed({ display: "06 79 02 50 27", e164: "+33679025027" }),
+  email: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+  openingHours: confirmed([
+    { days: "Du lundi au samedi", hours: "9 h 00 – 20 h 00" },
+    { days: "Dimanche", hours: "Fermé" },
+  ]),
+  // Tarifs non publiés : le site indique qu'ils sont communiqués lors de la prise de rendez-vous.
+  fees: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+  // Pas de plateforme : la prise de rendez-vous se fait par téléphone (resolveBookingAction).
+  onlineBookingUrl: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher » (rendez-vous par téléphone).`),
+  directoryListingUrl: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+  accessibility: confirmed("Accès, stationnement et sanitaires adaptés aux personnes à mobilité réduite"),
+  diplomas: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+  // « Validé » sans texte, avec la demande d'en proposer un : aucun parcours n'est inventé.
+  // Proposer un texte au praticien dès qu'il fournit ses éléments (formation, année, expérience).
+  background: notPublished(`${VALIDATION_SOURCE} : texte à proposer, rien de publié en attendant.`),
+  // « Validé » sans liste : aucun public n'est affiché (ni nourrissons ni femmes enceintes).
+  publics: notPublished(`${VALIDATION_SOURCE} : « Validé » sans liste, aucun public affiché.`),
   legal: {
-    siret: missing("Fournir le numéro SIRET du cabinet (la SELARL MERHI relevée au registre a un gérant différent et un code d'activité 86.23Z : à clarifier)."),
-    adeli: missing("Fournir le numéro d'enregistrement ADELI / RPPS d'ostéopathe."),
-    insurer: missing("Fournir l'assureur responsabilité civile professionnelle (mention recommandée)."),
-    publisher: missing("Préciser l'éditeur du site (nom, statut, adresse) et le directeur de publication."),
-    host: toConfirm(
-      "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis",
-      "Hébergeur suggéré par le brief",
-      "Confirmer l'hébergeur retenu.",
-    ),
+    siret: notPublished(`${VALIDATION_SOURCE} : « Validé » sans numéro, rien d'affiché.`),
+    adeli: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+    insurer: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
+    publisher: confirmed("QuadCore"),
+    host: confirmed("Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis"),
   },
-  photosAuthorization: toConfirm(
-    true,
-    "Photos transmises par QuadCore (fichiers nommés « Image ChatGPT » : retouches IA)",
-    "Confirmer par écrit l'autorisation d'utiliser les photos ET que les retouches n'ont pas modifié la réalité du cabinet, du praticien ou des équipements.",
-  ),
-  patientImageConsent: missing(
-    "Obtenir le consentement écrit de la personne visible sur les photos de consultation (ou confirmer qu'il s'agit d'un figurant).",
-  ),
+  photosAuthorization: confirmed(true),
+  patientImageConsent: confirmed(true),
 };
 
 /** Identité affichée partout : dérivée des faits (jamais de littéral ailleurs). */

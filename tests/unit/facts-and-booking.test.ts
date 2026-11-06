@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectPending, confirmed, missing, toConfirm } from "@/lib/facts";
+import { collectPending, confirmed, hasValue, isNotPublished, missing, notPublished, toConfirm } from "@/lib/facts";
 import { directionLinks, formatAddress, resolveBookingAction, telHref } from "@/lib/contact-links";
 
 const phone = toConfirm({ display: "06 79 02 50 27", e164: "+33679025027" }, "annuaire", "confirmer");
@@ -11,6 +11,14 @@ describe("faits client", () => {
     expect(pending.map((p) => p.path)).toEqual(["b.c", "b.d[0]"]);
     expect(pending[0]).toMatchObject({ status: "to-confirm", ask: "q1", source: "src" });
     expect(pending[1]).toMatchObject({ status: "missing", ask: "q2" });
+  });
+  it("une donnée que le praticien choisit de ne pas publier n'a pas de valeur et ne bloque plus", () => {
+    const fact = notPublished<string>("questionnaire : ne pas afficher");
+    expect(hasValue(fact)).toBe(false);
+    expect(isNotPublished(fact)).toBe(true);
+    expect(isNotPublished(confirmed("ok"))).toBe(false);
+    expect(isNotPublished(missing("q"))).toBe(false);
+    expect(collectPending({ fact })).toEqual([]);
   });
 });
 
@@ -30,6 +38,7 @@ describe("réservation", () => {
   it("se replie sur l'appel téléphonique, puis sur la page contact", () => {
     expect(resolveBookingAction(missing("q"), phone)).toMatchObject({ kind: "phone", href: "tel:+33679025027" });
     expect(resolveBookingAction(missing("q"), missing("q"))).toMatchObject({ kind: "none", href: "/contact" });
+    expect(resolveBookingAction(notPublished("pas de plateforme"), phone)).toMatchObject({ kind: "phone" });
   });
 });
 

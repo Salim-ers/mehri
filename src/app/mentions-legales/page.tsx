@@ -2,7 +2,7 @@ import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { PlateHeader } from "@/components/shared/PlateHeader";
 import { identity, practice } from "@/content/practice";
 import { formatAddress } from "@/lib/contact-links";
-import { hasValue, type Fact } from "@/lib/facts";
+import { hasValue, isNotPublished, type Fact } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -12,6 +12,7 @@ export const metadata = pageMetadata({
 });
 
 function Line({ label, fact }: { label: string; fact: Fact<string> }) {
+  if (isNotPublished(fact)) return null;
   return (
     <div className="grid gap-2 border-b border-umber/12 py-4 sm:grid-cols-[14rem_1fr]">
       <dt className="caption-mono text-ink-soft">{label}</dt>

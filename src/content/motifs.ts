@@ -1,5 +1,5 @@
 import type { RegionId } from "@/content/anatomy";
-import { toConfirm, type Fact } from "@/lib/facts";
+import { confirmed, type Fact } from "@/lib/facts";
 
 /**
  * Motifs de consultation — rédaction pédagogique et prudente.
@@ -22,11 +22,8 @@ export interface Motif {
   readonly dependsOnPublics?: boolean;
 }
 
-export const motifsValidation: Fact<boolean> = toConfirm(
-  true,
-  "Liste d'exemples du brief QuadCore",
-  "Valider chaque motif et sa rédaction ; retirer ceux qui ne correspondent pas à la pratique du cabinet.",
-);
+/** Motifs et rédaction : « Validé » dans le questionnaire du praticien du 06/11/2026. */
+export const motifsValidation: Fact<boolean> = confirmed(true);
 
 export const motifs: readonly Motif[] = [
   {
