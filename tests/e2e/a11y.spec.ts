@@ -19,12 +19,13 @@ test.describe("accessibilité (axe-core, WCAG 2.2 A/AA)", () => {
     });
   }
 
-  test("mouvement réduit : pas d'intro animée, contenu immédiatement visible", async ({ browser }) => {
+  test("mouvement réduit : contenu immédiatement visible, sans révélation animée", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
     const page = await ctx.newPage();
     await page.goto("/");
-    await expect(page.getByTestId("intro")).toBeHidden({ timeout: 2500 });
     await expect(page.locator("h1")).toBeVisible();
+    const opacity = await page.locator(".fade-up").first().evaluate((e) => getComputedStyle(e).opacity);
+    expect(Number(opacity)).toBe(1);
     await ctx.close();
   });
 });

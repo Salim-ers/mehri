@@ -52,18 +52,16 @@ Tests end-to-end sans navigateurs Playwright téléchargés : `PLAYWRIGHT_CHROME
 
 ## Pages
 
-| URL | Planche |
+| URL | Contenu |
 |---|---|
-| `/` | Accueil — intro cinématographique, colonne 3D narrative |
-| `/osteopathe` | I — Votre ostéopathe |
-| `/le-corps-en-mouvement` | II — Atlas 3D interactif (7 régions, `?region=genoux`) |
-| `/motifs-de-consultation` + 8 fiches | III — Motifs de consultation |
-| `/cabinet` | IV — Galerie immersive + plein écran |
-| `/equipements` | V — Équipements (présentation factuelle) |
-| `/deroulement-consultation` | VI — Chronologie en 4 temps |
-| `/rendez-vous` | VII — Prise de rendez-vous |
-| `/contact` | VIII — Coordonnées, itinéraires, plan (chargé sur consentement) |
-| `/mentions-legales`, `/confidentialite` | Pages légales |
+| `/` | Accueil — colonne 3D dans la lumière, nom, rendez-vous, adresse ; squelette radiographique ; motifs en radiographies ; cabinet |
+| `/osteopathe` | L'ostéopathe — approche, principes, qualification confirmée (aucun portrait) |
+| `/motifs-de-consultation` + 8 fiches | Pourquoi consulter ? — sélection des zones (3D radiographique), 4 familles dépliables |
+| `/le-corps-en-mouvement` | Corps en mouvement — explorateur 3D (7 régions, `?region=genoux`), mouvements articulaires |
+| `/cabinet` | Le cabinet — galerie empilée (lieux vides), matériel, accès |
+| `/rendez-vous` | Prendre rendez-vous — téléphone, horaires, adresse (aussi en panneau sur toutes les pages) |
+| `/equipements`, `/deroulement-consultation`, `/contact` | Pages complémentaires (pied de page, menu) |
+| `/mentions-legales`, `/confidentialite` | Pages légales (dont crédits des images sous licence) |
 
 ## Paramètres utiles
 

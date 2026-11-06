@@ -1,63 +1,95 @@
 import Link from "next/link";
 import { BookingButton } from "@/components/shared/BookingButton";
-import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
+import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
+import { equipment } from "@/content/equipment";
 import { galleryScenes } from "@/content/media";
 import { identity, practice } from "@/content/practice";
 import { CabinetGallery } from "@/features/cabinet/CabinetGallery";
+import { EquipmentList } from "@/features/cabinet/EquipmentList";
+import { directionLinks, formatAddress } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Le cabinet d'ostéopathie à Creil",
-  description:
-    `Découvrez en images le cabinet d'ostéopathie de ${identity.name} à ${identity.city} : salle de consultation lumineuse, tables de soins, bureau et modèles anatomiques.`,
+  description: `Le cabinet d'ostéopathie de ${identity.name} à ${identity.city} en images : salle de consultation lumineuse, tables de soins réglables, bureau et modèles anatomiques.`,
   path: "/cabinet",
   image: "/images/salle-consultation.jpg",
 });
 
 export default function CabinetPage() {
+  const address = hasValue(practice.address) ? practice.address.value : null;
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Le cabinet", path: "/cabinet" }])) }}
       />
-      <PlateHeader
-        plate="IV"
-        latin="Locus curae"
-        title={<Lines lines={["Le", <><em>cabinet.</em></>]} />}
+      <PageIntro
+        eyebrow="Le cabinet"
+        title={<Lines lines={["Un lieu calme,", <><em>baigné de lumière.</em></>]} />}
         lede={
           <p>
-            Murs blancs, sol en pierre, bois brun et lumière filtrée : un lieu sobre et lumineux, à Creil. Les photographies ci-dessous montrent
-            les espaces réels du cabinet. <PendingBadge fact={practice.photosAuthorization} />
+            Murs blancs, sol en pierre, bois brun et lumière filtrée, à {identity.city}. Les photographies montrent les espaces réels du cabinet.{" "}
+            <PendingBadge fact={practice.photosAuthorization} />
           </p>
         }
       />
-      <div className="px-[var(--gutter)] pb-28 md:pb-40">
-        <CabinetGallery scenes={galleryScenes} />
-      </div>
-      <section className="bg-paper px-[var(--gutter)] py-20 md:py-28">
-        <div className="mx-auto flex max-w-[110rem] flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <Reveal>
-            <p className="caption-mono text-bronze-ink">Accès</p>
-            <p className="display mt-4 max-w-2xl text-[clamp(1.8rem,1.2rem+2vw,3.2rem)] text-umber">
-              {hasValue(practice.address) ? `${practice.address.value.street}, ${practice.address.value.locality}` : "Creil"}
-              {hasValue(practice.address) ? <span className="block text-ink-soft">{practice.address.value.hint}</span> : null}
+
+      <CabinetGallery scenes={galleryScenes} />
+
+      {/* Le matériel (version courte ; détail sur /equipements) */}
+      <section aria-labelledby="materiel" className="relative z-[1] bg-paper px-[var(--gutter)] py-24 md:py-32">
+        <div className="wrap grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
+          <Reveal className="lg:col-span-4">
+            <p className="eyebrow">Le matériel</p>
+            <h2 id="materiel" className="display mt-5 text-[clamp(2.1rem,1.3rem+2.6vw,3.8rem)]">
+              Des tables réglables, <em>des modèles pour expliquer.</em>
+            </h2>
+            <p className="prose-body mt-6 max-w-sm">
+              Le matériel est décrit de façon factuelle : sa présence ne constitue ni une indication, ni la promesse d&apos;un effet.
             </p>
+            <Link href="/equipements" className="link-more mt-8 text-ink">
+              Le matériel en détail
+            </Link>
+          </Reveal>
+          <div className="lg:col-span-7 lg:col-start-6">
+            <EquipmentList items={equipment} />
+          </div>
+        </div>
+      </section>
+
+      {/* Accès */}
+      <section aria-labelledby="acces" className="relative z-[1] bg-ivory px-[var(--gutter)] py-24 md:py-32">
+        <div className="wrap grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
+          <Reveal className="lg:col-span-7">
+            <p className="eyebrow">Accès</p>
+            {address ? (
+              <h2 id="acces" className="display mt-5 text-[clamp(2.1rem,1.3rem+2.6vw,4rem)]">
+                {address.street}, <em>{address.locality}</em>
+              </h2>
+            ) : (
+              <h2 id="acces" className="display mt-5 text-[clamp(2.1rem,1.3rem+2.6vw,4rem)]">
+                {identity.city}
+              </h2>
+            )}
+            {address ? <p className="lede mt-5 text-ink-soft">{address.hint}</p> : null}
             {hasValue(practice.accessibility) ? (
-              <p className="mt-4 text-ink-soft">
-                {practice.accessibility.value} <PendingBadge fact={practice.accessibility} />
+              <p className="prose-body mt-4">
+                {practice.accessibility.value}. <PendingBadge fact={practice.accessibility} />
               </p>
             ) : null}
           </Reveal>
-          <div className="flex flex-wrap gap-3">
-            <BookingButton />
-            <Link href="/contact" className="btn btn-ghost text-umber">
-              Plan et itinéraire
-            </Link>
-          </div>
+          <Reveal className="flex flex-wrap items-center gap-x-7 gap-y-4 lg:col-span-4 lg:col-start-9 lg:self-end" delay={120}>
+            <BookingButton size="lg" />
+            {address ? (
+              <a href={directionLinks(address).google} target="_blank" rel="noopener noreferrer" className="link-more text-ink">
+                Itinéraire<span className="sr-only"> vers {formatAddress(address)} (Google Maps, nouvel onglet)</span>
+              </a>
+            ) : null}
+          </Reveal>
         </div>
       </section>
     </>

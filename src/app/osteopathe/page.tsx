@@ -1,65 +1,64 @@
-import { AtlasPhoto } from "@/components/shared/AtlasPhoto";
+import Image from "next/image";
+import Link from "next/link";
 import { BookingButton } from "@/components/shared/BookingButton";
-import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
+import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
+import { Photo } from "@/components/shared/Photo";
 import { Reveal } from "@/components/shared/Reveal";
+import { plates, xrays } from "@/content/imagery";
 import { photos } from "@/content/media";
-import { identity, practice } from "@/content/practice";
+import { identity, practice, reviewMode } from "@/content/practice";
 import { approach, approachValidation } from "@/content/practitioner";
+import { ImageCredit } from "@/features/imagery/ScrollCrossfade";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Votre ostéopathe",
-  description:
-    `${identity.name}, ${identity.title} à ${identity.city} : son approche du patient, sa manière de conduire les consultations et sa philosophie professionnelle.`,
+  title: "L'ostéopathe",
+  description: `${identity.name}, ${identity.title} à ${identity.city} : son approche du patient, sa manière de conduire les consultations et sa philosophie professionnelle.`,
   path: "/osteopathe",
-  image: "/images/praticien-portrait.jpg",
 });
 
 export default function OsteopathePage() {
-  const diplomas = practice.diplomas;
-  const background = practice.background;
-  const publics = practice.publics;
+  const { diplomas, background, publics } = practice;
+  const hasProfile = hasValue(diplomas) || hasValue(background) || hasValue(publics);
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Votre ostéopathe", path: "/osteopathe" }])) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "L'ostéopathe", path: "/osteopathe" }])) }}
       />
-      <PlateHeader
-        plate="I"
-        latin="Ars manualis"
-        title={<Lines lines={[`${identity.name},`, <><em>{identity.title.toLowerCase()}</em></>]} />}
+      <PageIntro
+        eyebrow="L'ostéopathe"
+        title={<Lines lines={[identity.name]} />}
         lede={
           <p>
-            Au cabinet de {identity.city}, {identity.name} accompagne ses patients avec une approche manuelle, attentive et expliquée.{" "}
-            <PendingBadge fact={practice.practitionerName} />
+            {identity.title} au cabinet de {identity.city}. Une approche manuelle, attentive et expliquée, qui commence toujours par
+            l&apos;écoute. <PendingBadge fact={practice.practitionerName} />
           </p>
         }
       />
 
-      {/* Portrait + approche */}
+      {/* Approche : composition anatomique, sans portrait */}
       <section aria-labelledby="approche" className="px-[var(--gutter)] pb-24 md:pb-36">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-14">
-          <AtlasPhoto
-            photo={photos.portrait}
-            sizes="(min-width: 1024px) 40vw, 100vw"
+        <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
+          <Photo
+            photo={photos.office}
+            sizes="(min-width: 1024px) 42vw, 100vw"
             priority
-            className="col-span-12 sm:col-span-8 lg:col-span-5"
-            aspect="464 / 700"
-            caption
-            figureNumber="1.1"
+            focus={[62, 62]}
+            className="h-[64svh] min-h-[380px] lg:col-span-5 lg:h-[86vh]"
+            caption="Le bureau du cabinet et ses modèles anatomiques, supports des explications données en consultation."
           />
-          <div className="col-span-12 lg:col-span-6 lg:col-start-7 lg:pt-24">
+          <div className="lg:col-span-6 lg:col-start-7 lg:pt-20">
             <Reveal>
-              <p className="caption-mono text-bronze-ink">
+              <p className="eyebrow">
                 Approche du patient <PendingBadge fact={approachValidation} />
               </p>
-              <h2 id="approche" className="display mt-5 text-[clamp(2.2rem,1.3rem+3.2vw,4.6rem)] text-umber">
+              <h2 id="approche" className="display mt-6 text-[clamp(2.3rem,1.4rem+3.4vw,4.8rem)]">
                 {approach.statement}
               </h2>
-              <div className="prose-atlas mt-8 max-w-xl">
+              <div className="prose-body mt-9 max-w-xl">
                 {approach.paragraphs.map((p) => (
                   <p key={p}>{p}</p>
                 ))}
@@ -69,77 +68,104 @@ export default function OsteopathePage() {
         </div>
       </section>
 
-      {/* Manière de conduire les consultations */}
-      <section aria-labelledby="principes" className="on-dark grain bg-umber px-[var(--gutter)] py-24 text-bone md:py-32">
-        <div className="mx-auto max-w-[110rem]">
-          <Reveal>
-            <p className="caption-mono text-bronze-light">Conduite de la consultation</p>
-            <h2 id="principes" className="display mt-5 max-w-3xl text-[clamp(2.2rem,1.3rem+3vw,4.4rem)]">
-              Quatre principes, <em>à chaque séance.</em>
-            </h2>
-          </Reveal>
-          <ol className="mt-16 grid gap-px overflow-hidden rounded-lg border border-bone/12 bg-bone/12 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Conduite de la consultation : quatre verbes, sans numérotation */}
+      <section aria-labelledby="principes" className="on-dark xray-stage grain overflow-hidden px-[var(--gutter)] py-24 text-bone md:py-36">
+        <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
+          <div className="lg:col-span-5">
+            <Reveal>
+              <p className="eyebrow">À chaque séance</p>
+              <h2 id="principes" className="display mt-5 text-[clamp(2.3rem,1.4rem+3vw,4.4rem)]">
+                Écouter, expliquer, <em>adapter, orienter.</em>
+              </h2>
+            </Reveal>
+            <Reveal className="mt-12 hidden lg:block" delay={150}>
+              <figure>
+                <div className="xray-frame relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[4px]">
+                  <Image src={xrays.cervical.src} alt={xrays.cervical.alt} fill sizes="30vw" className="xray-img object-cover" />
+                  <div className="scan-sweep" aria-hidden="true" />
+                </div>
+                <figcaption>
+                  <ImageCredit image={xrays.cervical} tone="dark" />
+                </figcaption>
+              </figure>
+            </Reveal>
+          </div>
+          <ul className="lg:col-span-6 lg:col-start-7">
             {approach.principles.map((p, i) => (
-              <li key={p.number} className="bg-umber p-7 md:p-9">
-                <Reveal delay={i * 90}>
-                  <p className="caption-mono text-bronze-light">{p.number}</p>
-                  <h3 className="display mt-6 text-4xl">{p.title}</h3>
-                  <p className="mt-4 leading-relaxed text-bone/75">{p.text}</p>
+              <li key={p.title} className="border-t border-bone/12 py-9 first:border-t-0 first:pt-0 lg:py-12">
+                <Reveal delay={i * 80}>
+                  <h3 className="display text-[clamp(2.2rem,1.6rem+2.2vw,3.8rem)]">{p.title}</h3>
+                  <p className="mt-4 max-w-lg text-[1.05rem] leading-relaxed text-bone/80">{p.text}</p>
                 </Reveal>
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
       </section>
 
-      {/* Parcours & formation : uniquement des données confirmées */}
-      <section aria-labelledby="parcours" className="px-[var(--gutter)] py-24 md:py-32">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-12">
-          <div className="col-span-12 lg:col-span-5">
-            <Reveal>
-              <p className="caption-mono text-bronze-ink">Parcours et formation</p>
-              <h2 id="parcours" className="display mt-5 text-[clamp(2rem,1.2rem+2.6vw,3.8rem)] text-umber">
-                Parcours <em>et formation</em>
-              </h2>
-              <p className="prose-atlas mt-6 max-w-md">Seules les informations validées par le praticien sont présentées ici.</p>
-            </Reveal>
-            <div className="mt-8 space-y-4">
-              {hasValue(background) ? <p className="prose-atlas">{background.value}</p> : <MissingSlot fact={background} />}
-              {hasValue(diplomas) ? (
-                <ul className="space-y-2">
-                  {diplomas.value.map((d) => (
-                    <li key={d} className="border-l-2 border-bronze pl-4">
-                      {d}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <MissingSlot fact={diplomas} />
-              )}
-              {hasValue(publics) ? (
-                <p className="prose-atlas">Publics accueillis : {publics.value.join(", ")}.</p>
-              ) : (
-                <MissingSlot fact={publics} />
-              )}
-            </div>
+      {/* Qualification : uniquement des informations confirmées par le praticien */}
+      <section aria-labelledby="qualification" className="px-[var(--gutter)] py-24 md:py-32">
+        <div className="wrap grid items-center gap-y-12 lg:grid-cols-12 lg:gap-x-8">
+          <div className="space-y-8 lg:col-span-5">
+          <Reveal>
+            <p className="eyebrow">Qualification</p>
+            <h2 id="qualification" className="display mt-5 text-[clamp(2.1rem,1.3rem+2.6vw,3.8rem)]">
+              {identity.title}
+            </h2>
+            <p className="prose-body mt-6 max-w-md">
+              En France, l&apos;ostéopathe intervient dans le cadre des troubles fonctionnels et oriente vers un médecin lorsque les symptômes
+              nécessitent un diagnostic ou un traitement médical (décret n° 2007-435 du 25 mars 2007).
+            </p>
+          </Reveal>
+          <div className="space-y-6">
+            {hasProfile || reviewMode ? (
+              <>
+                {hasValue(background) ? <p className="lede">{background.value}</p> : <MissingSlot fact={background} />}
+                {hasValue(diplomas) ? (
+                  <ul className="space-y-3">
+                    {diplomas.value.map((d) => (
+                      <li key={d} className="border-b border-ink/10 pb-3 text-[1.05rem]">
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <MissingSlot fact={diplomas} />
+                )}
+                {hasValue(publics) ? <p className="prose-body">Publics accueillis : {publics.value.join(", ")}.</p> : <MissingSlot fact={publics} />}
+              </>
+            ) : null}
+            <p className="prose-body">
+              Le détail d&apos;une consultation, de l&apos;échange aux conseils, est présenté pas à pas.{" "}
+              <Link href="/deroulement-consultation" className="link-line text-ink">
+                Le déroulement d&apos;une consultation
+              </Link>
+            </p>
           </div>
-          <div className="col-span-12 grid grid-cols-2 gap-4 lg:col-span-6 lg:col-start-7 md:gap-6">
-            <AtlasPhoto photo={photos.desk} sizes="(min-width: 1024px) 25vw, 50vw" aspect="466 / 760" caption figureNumber="1.2" />
-            <AtlasPhoto photo={photos.shoulder} sizes="(min-width: 1024px) 25vw, 50vw" aspect="466 / 760" className="mt-16 md:mt-28" caption figureNumber="1.3" delay={150} />
           </div>
+          <Reveal className="lg:col-span-5 lg:col-start-8" delay={120}>
+            <figure>
+              <div className="relative mx-auto aspect-[1708/2400] max-h-[86vh] overflow-hidden rounded-[4px] bg-mineral">
+                <Image src={plates.engraving.src} alt={plates.engraving.alt} fill sizes="(min-width: 1024px) 36vw, 100vw" className="object-cover" />
+              </div>
+              <figcaption>
+                <ImageCredit image={plates.engraving} />
+              </figcaption>
+            </figure>
+          </Reveal>
         </div>
       </section>
 
       {/* Philosophie */}
-      <section aria-labelledby="philosophie" className="bg-paper px-[var(--gutter)] py-24 md:py-32">
+      <section aria-labelledby="philosophie" className="bg-paper px-[var(--gutter)] py-24 md:py-36">
         <div className="mx-auto max-w-5xl text-center">
           <Reveal>
-            <p id="philosophie" className="caption-mono text-bronze-ink">
-              Philosophie professionnelle
-            </p>
-            <p className="display mt-8 text-[clamp(1.8rem,1.1rem+2.4vw,3.4rem)] leading-[1.15] text-umber">{approach.philosophy}</p>
+            <h2 id="philosophie" className="eyebrow">
+              Philosophie
+            </h2>
+            <p className="display mt-8 text-[clamp(1.9rem,1.2rem+2.4vw,3.6rem)] leading-[1.12]">{approach.philosophy}</p>
             <div className="mt-12 flex justify-center">
-              <BookingButton />
+              <BookingButton size="lg" />
             </div>
           </Reveal>
         </div>

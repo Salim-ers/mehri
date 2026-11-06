@@ -1,6 +1,6 @@
-import Link from "next/link";
+import { BookingButton } from "@/components/shared/BookingButton";
 import { PhoneIcon, RouteIcon } from "@/components/shared/Icons";
-import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
+import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
 import { Reveal } from "@/components/shared/Reveal";
 import { identity, practice } from "@/content/practice";
@@ -11,8 +11,7 @@ import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Contact et accès — cabinet d'ostéopathie à Creil",
-  description:
-    `Adresse, téléphone, itinéraire et informations pratiques du cabinet d'ostéopathie de ${identity.name} à ${identity.city} (60100).`,
+  description: `Adresse, téléphone, itinéraire et informations pratiques du cabinet d'ostéopathie de ${identity.name} à ${identity.city} (60100).`,
   path: "/contact",
 });
 
@@ -26,36 +25,36 @@ export default function ContactPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Contact et accès", path: "/contact" }])) }}
       />
-      <PlateHeader plate="VIII" latin="Via et aditus" title={<Lines lines={["Contact", <>& <em>accès.</em></>]} />} />
+      <PageIntro eyebrow="Contact et accès" title={<Lines lines={["Venir", <>au <em>cabinet.</em></>]} />} />
 
       <section className="px-[var(--gutter)] pb-24 md:pb-32">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-14">
-          <div className="col-span-12 space-y-12 lg:col-span-5">
+        <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
+          <div className="space-y-12 lg:col-span-5">
             {address ? (
               <Reveal>
-                <p className="caption-mono text-bronze-ink">
+                <h2 className="eyebrow">
                   Adresse <PendingBadge fact={practice.address} />
-                </p>
-                <address className="display mt-4 text-[clamp(1.8rem,1.2rem+2vw,3rem)] not-italic leading-tight text-umber">
+                </h2>
+                <address className="display mt-4 text-[clamp(2rem,1.3rem+2.2vw,3.2rem)] not-italic leading-tight">
                   {address.street}
                   <br />
                   {address.postalCode} {address.locality}
                 </address>
                 <p className="mt-3 text-ink-soft">{address.hint}</p>
                 {links ? (
-                  <ul className="mt-6 flex flex-wrap gap-2">
+                  <ul className="mt-7 flex flex-wrap gap-2">
                     <li>
                       <a href={links.google} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                         <RouteIcon /> Itinéraire Google Maps<span className="sr-only"> (nouvel onglet)</span>
                       </a>
                     </li>
                     <li>
-                      <a href={links.apple} target="_blank" rel="noopener noreferrer" className="btn btn-ghost text-umber">
+                      <a href={links.apple} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
                         Plans (Apple)<span className="sr-only"> (nouvel onglet)</span>
                       </a>
                     </li>
                     <li>
-                      <a href={links.waze} target="_blank" rel="noopener noreferrer" className="btn btn-ghost text-umber">
+                      <a href={links.waze} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
                         Waze<span className="sr-only"> (nouvel onglet)</span>
                       </a>
                     </li>
@@ -66,38 +65,37 @@ export default function ContactPage() {
 
             {phone ? (
               <Reveal>
-                <p className="caption-mono text-bronze-ink">
+                <h2 className="eyebrow">
                   Téléphone <PendingBadge fact={practice.phone} />
-                </p>
-                <a href={telHref(phone.e164)} className="display mt-4 inline-flex items-center gap-4 text-[clamp(2rem,1.3rem+2.4vw,3.4rem)] text-umber hover:text-bronze-ink">
-                  <PhoneIcon className="h-7 w-7" /> {phone.display}
+                </h2>
+                <a href={telHref(phone.e164)} className="display mt-4 inline-flex items-center gap-4 text-[clamp(2rem,1.3rem+2.4vw,3.4rem)] hover:text-bronze-ink">
+                  <PhoneIcon className="h-7 w-7 text-bronze-ink" /> {phone.display}
                 </a>
+                <div className="mt-6">
+                  <BookingButton />
+                </div>
               </Reveal>
             ) : null}
 
-            <Reveal>
-              <p className="caption-mono text-bronze-ink">E-mail</p>
-              {hasValue(practice.email) ? (
-                <a href={`mailto:${practice.email.value}`} className="link-atlas mt-3 inline-block text-lg text-umber">
+            {hasValue(practice.email) ? (
+              <Reveal>
+                <h2 className="eyebrow">E-mail</h2>
+                <a href={`mailto:${practice.email.value}`} className="link-line mt-3 inline-block text-lg">
                   {practice.email.value}
                 </a>
-              ) : (
-                <div className="mt-3">
-                  <MissingSlot fact={practice.email}>
-                    <p className="text-ink-soft">Pour toute demande, le plus simple est d&apos;appeler le cabinet.</p>
-                  </MissingSlot>
-                </div>
-              )}
-            </Reveal>
+              </Reveal>
+            ) : (
+              <MissingSlot fact={practice.email} />
+            )}
 
             <Reveal>
-              <p className="caption-mono text-bronze-ink">
+              <h2 className="eyebrow">
                 Horaires <PendingBadge fact={practice.openingHours} />
-              </p>
+              </h2>
               {hasValue(practice.openingHours) ? (
-                <dl className="mt-4 divide-y divide-umber/12 border-y border-umber/12">
+                <dl className="mt-4 border-t border-ink/10">
                   {practice.openingHours.value.map((h) => (
-                    <div key={h.days} className="flex justify-between gap-4 py-3">
+                    <div key={h.days} className="flex justify-between gap-4 border-b border-ink/10 py-3">
                       <dt>{h.days}</dt>
                       <dd className="text-ink-soft">{h.hours}</dd>
                     </div>
@@ -108,24 +106,18 @@ export default function ContactPage() {
 
             {hasValue(practice.accessibility) ? (
               <Reveal>
-                <p className="caption-mono text-bronze-ink">
+                <h2 className="eyebrow">
                   Accessibilité <PendingBadge fact={practice.accessibility} />
-                </p>
-                <p className="mt-3 text-ink">{practice.accessibility.value}.</p>
+                </h2>
+                <p className="mt-3">{practice.accessibility.value}.</p>
               </Reveal>
             ) : null}
           </div>
 
-          <div className="col-span-12 lg:col-span-6 lg:col-start-7">
+          <div className="lg:col-span-6 lg:col-start-7">
             {address && links ? (
               <div className="lg:sticky lg:top-[calc(var(--header-h)+2rem)]">
                 <MapEmbed src={links.embed} title={`Plan d'accès : ${formatAddress(address)}`} address={formatAddress(address)} />
-                <p className="mt-4 text-sm text-ink-soft">
-                  Besoin d&apos;un rendez-vous ?{" "}
-                  <Link href="/rendez-vous" className="link-atlas text-umber">
-                    Voir les modalités
-                  </Link>
-                </p>
               </div>
             ) : null}
           </div>

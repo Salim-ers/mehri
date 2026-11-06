@@ -91,6 +91,28 @@ export function useDeviceTier(): DeviceTier {
   );
 }
 
+/**
+ * Vrai une fois la page chargée et le fil principal inactif : la 3D ne concurrence
+ * jamais l'affichage du texte (LCP) ni les premières interactions.
+ */
+export function useIdleAfterLoad(timeout = 1500): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let idle = 0;
+    const schedule = () => {
+      idle = window.requestIdleCallback ? window.requestIdleCallback(() => setReady(true), { timeout }) : window.setTimeout(() => setReady(true), 300);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
+      else window.clearTimeout(idle);
+    };
+  }, [timeout]);
+  return ready;
+}
+
 /** Vrai lorsque l'élément est (presque) visible — sert à suspendre les rendus WebGL hors écran. */
 export function useInView(ref: RefObject<Element | null>, rootMargin = "200px"): boolean {
   const [inView, setInView] = useState(false);

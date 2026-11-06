@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ViewTransition } from "react";
+import { BookingDialog, type BookingInfo } from "@/components/layout/BookingDialog";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
-import { RouteTransition } from "@/components/layout/RouteTransition";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SpineProgress } from "@/components/layout/SpineProgress";
+import { bookingAction } from "@/components/shared/BookingButton";
 import { identity, practice, siteUrl } from "@/content/practice";
 import { directionLinks, formatAddress, telHref } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
@@ -28,23 +28,11 @@ const instrument = localFont({
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
 });
-const plexMono = localFont({
-  src: [
-    { path: "../fonts/ibm-plex-mono-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/ibm-plex-mono-latin-500-normal.woff2", weight: "500", style: "normal" },
-  ],
-  variable: "--font-plex-mono",
-  display: "swap",
-  // légendes techniques : non critiques pour le premier affichage
-  preload: false,
-  fallback: ["ui-monospace", "monospace"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: SITE_NAME, template: `%s · ${identity.name}, ostéopathe à ${identity.city}` },
-  description:
-    `Cabinet d'ostéopathie de ${identity.name}, ${identity.title} à ${identity.city} (60100) : consultations, motifs de consultation, déroulement d'une séance et prise de rendez-vous.`,
+  description: `Cabinet d'ostéopathie de ${identity.name}, ${identity.title} à ${identity.city} (60100) : consultations, motifs de consultation, déroulement d'une séance et prise de rendez-vous.`,
   applicationName: `${identity.name} — ${identity.title}`,
   formatDetection: { telephone: false },
   // préproductions : noindex (cohérent avec robots.txt)
@@ -52,20 +40,35 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F6F1E9",
+  themeColor: "#F3F0EA",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
-/** Exécuté avant le premier rendu : évite tout flash de l'écran d'ouverture déjà vu. */
-const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');try{var c=navigator.connection;if(sessionStorage.getItem('mm-intro-seen')||matchMedia('(prefers-reduced-motion: reduce)').matches||(c&&(c.saveData||/2g/.test(c.effectiveType||''))))d.dataset.intro='skip'}catch(e){}})();`;
+/** Exécuté avant le premier rendu : active les animations progressives (le contenu reste visible sans JavaScript). */
+const bootScript = `document.documentElement.classList.add('js');`;
+
+function bookingInfo(): BookingInfo {
+  const phone = hasValue(practice.phone) ? practice.phone.value : null;
+  const address = hasValue(practice.address) ? practice.address.value : null;
+  return {
+    phoneDisplay: phone?.display ?? null,
+    phoneHref: phone ? telHref(phone.e164) : null,
+    online: bookingAction.kind === "online" ? { href: bookingAction.href, label: bookingAction.label } : null,
+    hours: hasValue(practice.openingHours) ? practice.openingHours.value : [],
+    addressLine: address ? formatAddress(address) : null,
+    addressHint: address?.hint ?? null,
+    directionsHref: address ? directionLinks(address).google : null,
+    feesNote: hasValue(practice.fees) ? null : "Les tarifs vous sont communiqués lors de la prise de rendez-vous.",
+  };
+}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const phone = hasValue(practice.phone) ? practice.phone.value : null;
   const address = hasValue(practice.address) ? practice.address.value : null;
   return (
-    <html lang="fr" className={`${newsreader.variable} ${instrument.variable} ${plexMono.variable}`} suppressHydrationWarning>
+    <html lang="fr" className={`${newsreader.variable} ${instrument.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd([practiceJsonLd(), practitionerJsonLd()]) }} />
@@ -79,15 +82,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           phoneHref={phone ? telHref(phone.e164) : null}
           addressLine={address ? formatAddress(address) : null}
         />
-        <SpineProgress />
-        <RouteTransition />
-        <ViewTransition default="atlas-page">
+        <ViewTransition default="site-page">
           <main id="contenu" tabIndex={-1} className="outline-none">
             {children}
           </main>
         </ViewTransition>
         <SiteFooter />
         <MobileActionBar phoneHref={phone ? telHref(phone.e164) : null} directionsHref={address ? directionLinks(address).google : null} />
+        <BookingDialog info={bookingInfo()} />
       </body>
     </html>
   );

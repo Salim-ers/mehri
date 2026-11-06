@@ -15,15 +15,18 @@ interface BodyMapProps {
   readonly selected: RegionId | null;
   readonly onSelect: (id: RegionId) => void;
   readonly labels: Record<RegionId, string>;
+  /** fond clair (explorateur) ou sombre (sélection des zones) */
+  readonly tone?: "light" | "dark";
 }
 
 /**
  * Silhouette anatomique vectorielle : alternative sans WebGL de l'atlas 3D.
  * Chaque repère est un vrai bouton (clavier, lecteurs d'écran).
  */
-export function BodyMap({ selected, onSelect, labels }: BodyMapProps) {
+export function BodyMap({ selected, onSelect, labels, tone = "dark" }: BodyMapProps) {
+  const dark = tone === "dark";
   return (
-    <div className="relative mx-auto aspect-[200/440] h-full max-h-[78svh] text-bone">
+    <div className={`relative mx-auto aspect-[200/440] h-full max-h-[78svh] ${dark ? "text-xray" : "text-ink"}`}>
       <svg viewBox="0 0 200 440" className="absolute inset-0 h-full w-full" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
         <g opacity="0.55">
           <ellipse cx="100" cy="30" rx="17" ry="21" />
@@ -51,7 +54,11 @@ export function BodyMap({ selected, onSelect, labels }: BodyMapProps) {
             className="group absolute -translate-x-1/2 -translate-y-1/2 p-2"
             style={{ left: `${(x / 200) * 100}%`, top: `${(y / 440) * 100}%` }}
           >
-            <span className={`block h-4 w-4 rounded-full border-2 transition-all duration-300 ${on ? "scale-125 border-bronze-light bg-bronze" : "border-bone/70 bg-umber group-hover:border-bronze-light"}`} />
+            <span
+              className={`block h-4 w-4 rounded-full border-2 transition-all duration-300 ${
+                on ? "scale-125 border-bronze-light bg-bronze" : dark ? "border-xray/70 bg-anthracite group-hover:border-bronze-light" : "border-ink/50 bg-paper group-hover:border-bronze"
+              }`}
+            />
           </button>
         );
       })}

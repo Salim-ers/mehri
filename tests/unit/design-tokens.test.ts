@@ -7,14 +7,17 @@ import { join } from "node:path";
 describe("contrastes WCAG 2.2 AA des couples utilisés", () => {
   const pairs: Array<[keyof typeof colors, keyof typeof colors, number]> = [
     ["ink", "ivory", 7],
+    ["ink", "mineral", 7],
     ["inkSoft", "ivory", 4.5],
     ["inkSoft", "paper", 4.5],
+    ["inkSoft", "mineral", 4.5],
     ["bronzeInk", "ivory", 4.5],
     ["bronzeInk", "paper", 4.5],
-    ["umber", "ivory", 7],
-    ["paper", "umber", 7],
-    ["bone", "umber", 4.5],
-    ["bronzeLight", "umber", 4.5],
+    ["anthracite", "ivory", 7],
+    ["paper", "anthracite", 7],
+    ["bone", "anthracite", 7],
+    ["bronzeLight", "anthracite", 4.5],
+    ["xray", "anthracite", 7],
     ["review", "reviewBg", 4.5],
   ];
   for (const [fg, bg, min] of pairs) {
@@ -24,10 +27,12 @@ describe("contrastes WCAG 2.2 AA des couples utilisés", () => {
   }
   it("globals.css reprend exactement les tokens (source unique)", () => {
     const css = readFileSync(join(__dirname, "../../src/app/globals.css"), "utf8").toLowerCase();
-    const map: Record<string, keyof typeof colors> = {
-      "--color-paper": "paper", "--color-ivory": "ivory", "--color-umber": "umber", "--color-bronze-ink": "bronzeInk",
-      "--color-ink-soft": "inkSoft", "--color-bronze-light": "bronzeLight", "--color-bone": "bone",
-    };
-    for (const [v, key] of Object.entries(map)) expect(css).toContain(`${v}: ${colors[key].toLowerCase()};`);
+    const kebab = (k: string) => k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+    for (const [key, value] of Object.entries(colors)) expect(css).toContain(`--color-${kebab(key)}: ${value.toLowerCase()};`);
+  });
+  it("aucune police mono ni quadrillage de fond dans la feuille de style", () => {
+    const css = readFileSync(join(__dirname, "../../src/app/globals.css"), "utf8");
+    expect(css).not.toMatch(/font-mono|plex|monospace/i);
+    expect(css).not.toMatch(/hero-grid|registration|\.ruler/);
   });
 });

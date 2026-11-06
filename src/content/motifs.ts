@@ -223,7 +223,7 @@ export const motifs: readonly Motif[] = [
     caution: [
       "Ostéoporose connue, traitement anticoagulant ou antécédent de cancer : signalez-le dès la prise de rendez-vous",
       "Chute récente chez une personne âgée : un avis médical est indispensable",
-      "Les publics pris en charge au cabinet sont précisés ci-dessous",
+      "Précisez votre âge, vos antécédents et vos traitements en cours lors de la prise de rendez-vous",
     ],
   },
   {
@@ -253,6 +253,45 @@ export const motifs: readonly Motif[] = [
       "Certaines techniques ne sont pas adaptées en cas d'ostéoporose, de traitement anticoagulant ou de certaines pathologies : signalez vos antécédents",
       "Vous pouvez à tout moment demander une approche plus douce ou refuser une technique",
     ],
+  },
+];
+
+/**
+ * Grandes catégories : la page « Pourquoi consulter ? » présente d'abord ces
+ * familles, puis le détail des fiches sur demande. Chaque fiche appartient à
+ * exactement une catégorie (vérifié par un test).
+ */
+export interface MotifCategory {
+  readonly id: string;
+  readonly title: string;
+  readonly intro: string;
+  readonly slugs: readonly string[];
+}
+
+export const motifCategories: readonly MotifCategory[] = [
+  {
+    id: "dos-et-nuque",
+    title: "Le dos et la nuque",
+    intro: "Raideurs, gêne du bas du dos ou de la nuque, sensation de dos « bloqué » sans traumatisme.",
+    slugs: ["dos-et-lombalgies", "tensions-cervicales", "osteopathie-structurelle"],
+  },
+  {
+    id: "articulations",
+    title: "Les articulations",
+    intro: "Épaules, hanches, genoux : lorsqu'un mouvement du quotidien devient moins fluide.",
+    slugs: ["inconfort-des-epaules", "mobilite-articulaire"],
+  },
+  {
+    id: "activite",
+    title: "Muscles et activité physique",
+    intro: "Tensions musculaires, pratique sportive régulière ou reprise d'une activité.",
+    slugs: ["tensions-musculaires", "consultation-de-sportifs"],
+  },
+  {
+    id: "ages",
+    title: "À chaque étape de la vie",
+    intro: "Une consultation adaptée à l'âge, aux antécédents et au rythme de vie de chacun.",
+    slugs: ["accompagnement-selon-l-age"],
   },
 ];
 

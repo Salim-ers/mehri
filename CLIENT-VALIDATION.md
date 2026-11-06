@@ -52,3 +52,9 @@ Les sections suivantes gardent l'état initial pour mémoire.
 ## 4. Après validation
 
 Passer chaque entrée en `confirmed(...)` dans `src/content/`, relancer `npm run release:gate`, puis déployer avec `NEXT_PUBLIC_REVIEW_MODE=false`.
+
+## Refonte graphique du 6 novembre 2026
+
+- **Aucune photographie de personne** n'est plus publiée : portrait, praticien au bureau, consultations et appareils tenus en main sont retirés du site (fichiers sources conservés dans `assets/source/`). Restent les trois vues des lieux vides : salle, tables, bureau.
+- Les appareils de percussion et à embout circulaire sont décrits sans image : leurs seules photos montrent une personne.
+- **Visuels anatomiques sous licence libre** (Wikimedia Commons, licences vérifiées le 06/11/2026) : radiographies du rachis lombaire et cervical, du bassin, du genou et de l'épaule, une vertèbre de collection et une gravure de 1798. Chaque image est légendée « sans lien avec un patient du cabinet » ; auteur, licence et source figurent dans les mentions légales. Détail : `assets/imagery-source/credits.json`.

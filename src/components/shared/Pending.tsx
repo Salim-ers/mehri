@@ -26,7 +26,7 @@ export function MissingSlot({ fact, children }: { fact: Fact<unknown>; children?
   if (!reviewMode || fact.status === "confirmed") return children ?? null;
   return (
     <div className="rounded-md border border-dashed border-review/50 bg-review-bg/70 px-4 py-3 text-sm text-review">
-      <p className="caption-mono mb-1">À fournir par le praticien</p>
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wide">À fournir par le praticien</p>
       <p>{fact.ask}</p>
       {children}
     </div>

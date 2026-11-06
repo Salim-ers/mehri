@@ -28,24 +28,36 @@ test.describe("navigation multipage", () => {
     expect(titles.size).toBe(PAGES.length);
   });
 
-  test("le menu Index s'ouvre, se ferme avec Échap et rend le focus", async ({ page }) => {
+  test("le menu s'ouvre, se ferme avec Échap et rend le focus", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
     await page.goto("/osteopathe");
-    const button = page.getByRole("button", { name: /index/i });
+    const button = page.getByRole("button", { name: /menu/i });
     await button.click();
-    const dialog = page.getByRole("dialog", { name: "Index du site" });
+    const dialog = page.getByRole("dialog", { name: "Menu du site" });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /Motifs de consultation/ })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /Pourquoi consulter/ })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
     await expect(button).toBeFocused();
   });
 
-  test("navigation par le menu vers une autre planche", async ({ page }) => {
+  test("navigation principale : six entrées, dont la prise de rendez-vous", async ({ page, isMobile }) => {
+    test.skip(isMobile, "barre de navigation complète à partir de 1280 px (menu sur mobile)");
     await page.goto("/");
-    await page.getByRole("button", { name: /index/i }).click();
-    await page.getByRole("dialog").getByRole("link", { name: /Le cabinet/ }).click();
+    const nav = page.getByRole("navigation", { name: "Navigation principale" });
+    for (const label of ["Accueil", "L'ostéopathe", "Pourquoi consulter ?", "Corps en mouvement", "Le cabinet"]) {
+      await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
+    }
+    await expect(page.locator("header").getByRole("link", { name: "Prendre RDV" })).toBeVisible();
+  });
+
+  test("navigation par le menu vers une autre page", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto("/");
+    await page.getByRole("button", { name: /menu/i }).click();
+    await page.getByRole("dialog", { name: "Menu du site" }).getByRole("link", { name: /^Le cabinet/ }).click();
     await expect(page).toHaveURL(/\/cabinet$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("cabinet");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("calme");
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
@@ -62,38 +74,42 @@ test.describe("navigation multipage", () => {
   });
 });
 
-test.describe("écran d'ouverture", () => {
-  test("apparaît à la première visite puis disparaît sans bloquer", async ({ page }) => {
+test.describe("accueil", () => {
+  test("nom, titre, rendez-vous et adresse sont visibles immédiatement", async ({ page }) => {
     await page.goto("/");
-    const intro = page.getByTestId("intro");
-    await expect(intro).toBeVisible();
-    // le contenu est présent et cliquable derrière l'intro
-    await expect(page.locator("h1")).toContainText("mouvement");
-    await expect(intro).toBeHidden({ timeout: 10_000 });
+    await expect(page.locator("h1")).toContainText("Mohamed Merhi");
+    await expect(page.locator("h1")).toContainText("Ostéopathe D.O.");
+    await expect(page.locator(".hero-stage").getByRole("link", { name: /Prendre rendez-vous/ })).toBeVisible();
+    await expect(page.locator(".hero-stage").getByText(/241 rue du Bois des Cerisiers/)).toBeVisible();
   });
-  test("ne réapparaît pas dans la même session", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByTestId("intro")).toBeHidden({ timeout: 10_000 });
-    await page.reload();
-    await expect(page.getByTestId("intro")).toBeHidden();
-  });
-  test("se referme immédiatement à l'interaction", async ({ page }) => {
-    await page.goto("/");
-    await page.mouse.click(200, 200);
-    await expect(page.getByTestId("intro")).toBeHidden({ timeout: 3000 });
+  test("aucune photographie de personne n'est servie", async ({ page }) => {
+    for (const path of ["/", "/osteopathe", "/cabinet", "/equipements", "/deroulement-consultation"]) {
+      await page.goto(path);
+      const sources = await page.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).currentSrc || (i as HTMLImageElement).src));
+      for (const src of sources) expect(src, path).not.toMatch(/praticien|consultation-(cervicales|epaule)|equipement-(percussion|applicateur)/);
+    }
   });
 });
 
 test.describe("réservation et contact", () => {
   test.beforeEach(async ({ page }) => skipIntro(page));
 
-  test("les CTA mènent à la page rendez-vous, qui propose un appel réel", async ({ page }) => {
+  test("« Prendre rendez-vous » ouvre le panneau avec un appel réel, sans faux créneau", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Prendre rendez-vous" }).first().click();
-    await expect(page).toHaveURL(/\/rendez-vous$/);
-    const call = page.getByRole("link", { name: /Appeler le 06 79 02 50 27/ }).first();
+    await page.locator(".hero-stage").getByRole("link", { name: /Prendre rendez-vous/ }).click();
+    const sheet = page.getByRole("dialog", { name: /Prendre rendez-vous/ });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("link", { name: /Appeler le 06 79 02 50 27/ })).toHaveAttribute("href", "tel:+33679025027");
+    await expect(sheet.getByText(/créneaux? disponibles?/i)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("la page rendez-vous fonctionne seule (sans le panneau)", async ({ page }) => {
+    await page.goto("/rendez-vous");
+    const call = page.getByRole("main").getByRole("link", { name: /Appeler le 06 79 02 50 27/ }).first();
     await expect(call).toHaveAttribute("href", "tel:+33679025027");
-    // aucune fausse disponibilité affichée
     await expect(page.getByText(/créneaux? disponibles?/i)).toHaveCount(0);
   });
 
@@ -162,7 +178,13 @@ test.describe("accueil 3D", () => {
     await page.mouse.wheel(0, 2400);
     await page.waitForTimeout(800);
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(before + 1000);
-    await expect(page.locator(".hero-beat.is-on")).toHaveCount(1);
+  });
+  test("la rotation de la colonne peut être suspendue (WCAG 2.2.2)", async ({ page }) => {
+    await page.goto("/?force-webgl");
+    const pause = page.getByRole("button", { name: /rotation de la colonne/ });
+    await expect(pause).toBeVisible({ timeout: 30_000 });
+    await pause.click();
+    await expect(pause).toHaveAttribute("aria-pressed", "true");
   });
   test("rendu logiciel (sans GPU) : repli automatique sur l'illustration vectorielle", async ({ page }) => {
     // le navigateur de test utilise SwiftShader : la 3D ne doit pas être imposée

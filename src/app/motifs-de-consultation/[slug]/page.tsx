@@ -42,7 +42,7 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
           __html: serializeJsonLd([
             breadcrumbJsonLd([
               { name: "Accueil", path: "/" },
-              { name: "Motifs de consultation", path: "/motifs-de-consultation" },
+              { name: "Pourquoi consulter ?", path: "/motifs-de-consultation" },
               { name: motif.title, path },
             ]),
             {
@@ -57,61 +57,61 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
           ]),
         }}
       />
-      <header className="px-[var(--gutter)] pt-[calc(var(--header-h)+3rem)] md:pt-[calc(var(--header-h)+5rem)]">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-8">
-          <nav aria-label="Fil d'Ariane" className="caption-mono col-span-12 text-ink-soft">
+      <header className="px-[var(--gutter)] pt-[calc(var(--header-h)+3rem)] md:pt-[calc(var(--header-h)+5.5rem)]">
+        <div className="wrap">
+          <nav aria-label="Fil d'Ariane" className="text-sm text-ink-soft">
             <ol className="flex flex-wrap gap-2">
               <li>
-                <Link href="/motifs-de-consultation" className="hover:text-umber">
-                  Motifs de consultation
+                <Link href="/motifs-de-consultation" className="hover:text-ink">
+                  Pourquoi consulter ?
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li aria-current="page" className="text-bronze-ink">
-                Fiche {motif.number}
+              <li aria-current="page" className="text-ink">
+                {motif.shortTitle}
               </li>
             </ol>
           </nav>
-          <div className="col-span-12 lg:col-span-8">
-            <h1 className="display text-[clamp(2.5rem,1.4rem+4.4vw,6.4rem)] text-umber">{motif.title}</h1>
-            <p className="mt-8 max-w-2xl font-display text-[clamp(1.2rem,1rem+0.7vw,1.7rem)] leading-snug text-ink">{motif.lede}</p>
-            <p className="caption-mono mt-6 text-ink-soft">
-              Région associée : {region.label} <PendingBadge fact={motifsValidation} />
-              {motif.dependsOnPublics ? <PendingBadge fact={practice.publics} className="ml-2" /> : null}
-            </p>
+          <div className="mt-8 grid gap-y-8 lg:grid-cols-12 lg:gap-x-8">
+            <h1 className="display line-rise text-[clamp(2.6rem,1.4rem+4.6vw,6.6rem)] lg:col-span-8">
+              <span>
+                <span>{motif.title}</span>
+              </span>
+            </h1>
+            <div className="lg:col-span-4 lg:self-end">
+              <p className="lede text-ink-soft">{motif.lede}</p>
+              <p className="mt-4 text-sm text-ink-soft">
+                Région : {region.label} <PendingBadge fact={motifsValidation} />
+                {motif.dependsOnPublics ? <PendingBadge fact={practice.publics} className="ml-2" /> : null}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="mx-auto mt-12 max-w-[110rem]">
-          <div className="ruler" />
         </div>
       </header>
 
       <div className="px-[var(--gutter)] py-16 md:py-24">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-14">
-          {/* Illustration 3D de la région */}
-          <div className="col-span-12 lg:col-span-5">
+        <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
+          {/* Illustration 3D (rendu radiographique) */}
+          <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-[calc(var(--header-h)+2rem)]">
               <figure>
-                <div className="registration relative h-[56svh] max-h-[640px] overflow-hidden rounded-lg bg-[radial-gradient(70%_60%_at_50%_45%,#fffaf2,#ece3d6)] text-umber/40">
-                  <RegionViewer region={motif.region} fallback={<RegionGlyph region={motif.region} className="h-4/5 w-auto text-umber/70" />} />
+                <div className="xray-stage relative h-[58svh] max-h-[680px] overflow-hidden rounded-[4px] text-xray/50">
+                  <RegionViewer region={motif.region} fallback={<RegionGlyph region={motif.region} className="h-4/5 w-auto text-xray/60" />} />
                 </div>
-                <figcaption className="caption-mono mt-3 text-ink-soft">
-                  <span className="text-bronze-ink">Fig. {motif.number}</span> — {region.label}. {region.movement.caption}
-                </figcaption>
+                <figcaption className="mt-3 text-[0.85rem] text-ink-soft">{region.movement.caption}</figcaption>
               </figure>
-              <Link href={`/le-corps-en-mouvement?region=${region.id}#atlas`} className="link-atlas mt-5 inline-block text-umber">
-                Explorer cette région dans l&apos;atlas 3D →
+              <Link href={`/le-corps-en-mouvement?region=${region.id}#atlas`} className="link-more mt-5 text-ink">
+                Explorer cette région en 3D
               </Link>
             </div>
           </div>
 
-          <div className="col-span-12 space-y-16 lg:col-span-6 lg:col-start-7">
+          <div className="space-y-16 lg:col-span-6 lg:col-start-7">
             <Reveal as="section" aria-labelledby="contexte">
-              <p className="caption-mono text-bronze-ink">01 · Contexte</p>
-              <h2 id="contexte" className="display mt-3 text-3xl text-umber md:text-4xl">
+              <h2 id="contexte" className="display text-[clamp(1.9rem,1.5rem+1.4vw,2.8rem)]">
                 Comprendre
               </h2>
-              <div className="prose-atlas mt-5">
+              <div className="prose-body mt-5">
                 {motif.context.map((p) => (
                   <p key={p}>{p}</p>
                 ))}
@@ -119,16 +119,12 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
             </Reveal>
 
             <Reveal as="section" aria-labelledby="situations">
-              <p className="caption-mono text-bronze-ink">02 · Situations fréquentes</p>
-              <h2 id="situations" className="display mt-3 text-3xl text-umber md:text-4xl">
+              <h2 id="situations" className="display text-[clamp(1.9rem,1.5rem+1.4vw,2.8rem)]">
                 Ce qui amène à consulter
               </h2>
-              <ul className="mt-6 divide-y divide-umber/12 border-y border-umber/12">
+              <ul className="mt-6 border-t border-ink/10">
                 {motif.situations.map((s) => (
-                  <li key={s} className="flex gap-4 py-4 text-[1.02rem]">
-                    <span aria-hidden="true" className="caption-mono pt-1 text-bronze-ink">
-                      ◇
-                    </span>
+                  <li key={s} className="border-b border-ink/10 py-4 text-[1.05rem]">
                     {s}
                   </li>
                 ))}
@@ -136,29 +132,28 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
             </Reveal>
 
             <Reveal as="section" aria-labelledby="deroulement">
-              <p className="caption-mono text-bronze-ink">03 · Déroulement possible</p>
-              <h2 id="deroulement" className="display mt-3 text-3xl text-umber md:text-4xl">
+              <h2 id="deroulement" className="display text-[clamp(1.9rem,1.5rem+1.4vw,2.8rem)]">
                 Pendant la consultation
               </h2>
-              <ol className="mt-6 space-y-5">
-                {motif.session.map((s, i) => (
-                  <li key={s} className="grid grid-cols-[2.5rem_1fr] gap-3">
-                    <span className="display text-2xl text-bronze-ink">{i + 1}</span>
-                    <p className="prose-atlas">{s}</p>
+              <ol className="mt-6 space-y-4">
+                {motif.session.map((s) => (
+                  <li key={s} className="flex gap-4">
+                    <span aria-hidden="true" className="mt-[0.75em] block h-px w-6 shrink-0 bg-bronze" />
+                    <p className="prose-body">{s}</p>
                   </li>
                 ))}
               </ol>
               {motif.dependsOnPublics ? (
                 <div className="mt-6">
                   {hasValue(practice.publics) ? (
-                    <p className="prose-atlas">Publics accueillis au cabinet : {practice.publics.value.join(", ")}.</p>
+                    <p className="prose-body">Publics accueillis au cabinet : {practice.publics.value.join(", ")}.</p>
                   ) : (
                     <MissingSlot fact={practice.publics} />
                   )}
                 </div>
               ) : null}
               <p className="mt-6">
-                <Link href="/deroulement-consultation" className="link-atlas text-umber">
+                <Link href="/deroulement-consultation" className="link-line text-ink">
                   Le déroulement d&apos;une consultation en détail
                 </Link>
               </p>
@@ -168,9 +163,9 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
               <RedFlags extra={motif.caution} />
             </Reveal>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <BookingButton />
-              <Link href="/motifs-de-consultation" className="btn btn-ghost text-umber">
+            <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
+              <BookingButton size="lg" />
+              <Link href="/motifs-de-consultation" className="link-more text-ink">
                 Tous les motifs
               </Link>
             </div>
@@ -178,15 +173,15 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
         </div>
       </div>
 
-      <nav aria-label="Fiches voisines" className="border-t border-umber/12 px-[var(--gutter)]">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-2">
-          <Link href={`/motifs-de-consultation/${prev.slug}`} className="group border-r border-umber/12 py-10 pr-6">
-            <span className="caption-mono text-ink-soft">← Fiche {prev.number}</span>
-            <span className="display mt-2 block text-xl text-umber transition-colors group-hover:text-bronze-ink md:text-3xl">{prev.title}</span>
+      <nav aria-label="Fiches voisines" className="border-t border-ink/10 px-[var(--gutter)]">
+        <div className="wrap grid grid-cols-2">
+          <Link href={`/motifs-de-consultation/${prev.slug}`} className="group border-r border-ink/10 py-10 pr-6">
+            <span className="text-sm text-ink-soft">← Précédent</span>
+            <span className="display mt-2 block text-xl transition-colors group-hover:text-bronze-ink md:text-3xl">{prev.title}</span>
           </Link>
           <Link href={`/motifs-de-consultation/${next.slug}`} className="group py-10 pl-6 text-right">
-            <span className="caption-mono text-ink-soft">Fiche {next.number} →</span>
-            <span className="display mt-2 block text-xl text-umber transition-colors group-hover:text-bronze-ink md:text-3xl">{next.title}</span>
+            <span className="text-sm text-ink-soft">Suivant →</span>
+            <span className="display mt-2 block text-xl transition-colors group-hover:text-bronze-ink md:text-3xl">{next.title}</span>
           </Link>
         </div>
       </nav>

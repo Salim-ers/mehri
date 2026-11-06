@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
 import { motifs } from "@/content/motifs";
 import { siteUrl } from "@/content/practice";
-import { navigation } from "@/content/site";
+import { navigation, secondaryPages } from "@/content/site";
 
 const LAST_MODIFIED = new Date("2026-11-06");
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = navigation.map((n) => ({
+  const pages = [...navigation, ...secondaryPages].map((n) => ({
     url: `${siteUrl}${n.href === "/" ? "" : n.href}`,
     lastModified: LAST_MODIFIED,
     changeFrequency: "monthly" as const,

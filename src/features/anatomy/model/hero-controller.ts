@@ -5,46 +5,80 @@ import { disposeGeometries, spineBuilder, type SpineModel } from "./spine";
 import type { Detail } from "./vertebra-geometry";
 
 /**
- * Logique impérative de la scène d'accueil (assemblage, étapes de lecture,
- * parallaxe, caméra, légendes). Isolée du composant React : celui-ci ne fait
- * qu'appeler `update` à chaque image.
+ * Logique impérative de la scène d'accueil : la colonne apparaît dans une
+ * lumière douce, tourne lentement sur elle-même et réagit discrètement au
+ * pointeur. Le composant React se contente d'appeler `update` à chaque image.
  */
-export type HeroStep = 0 | 1 | 2;
+
+/** Cadrage adapté à la forme de l'écran (calculé par `heroLayout`). */
+export interface HeroLayout {
+  /** décalage horizontal de la colonne (composition asymétrique sur grand écran) */
+  readonly offsetX: number;
+  /** hauteur visée par la caméra (cadrage plus serré, colonne plus haute sur mobile) */
+  readonly targetY: number;
+  /** distance de la caméra */
+  readonly distance: number;
+  /** légère inclinaison de la composition (mobile) */
+  readonly tilt: number;
+}
+
+/** Composition propre à chaque format d'écran — pas une simple réduction du bureau. */
+export function heroLayout(width: number, height: number): HeroLayout {
+  const aspect = width / Math.max(1, height);
+  if (aspect >= 1.9) return { offsetX: 3.3, targetY: 0.55, distance: 13, tilt: 0 }; // ultralarge
+  if (aspect >= 1.25) return { offsetX: 2.25, targetY: 0.55, distance: 13.2, tilt: 0 }; // ordinateur
+  if (aspect >= 0.8) return { offsetX: 1.6, targetY: 0.45, distance: 14.4, tilt: -0.05 }; // tablette
+  // portrait : colonne plus grande, décalée à droite dans la moitié haute, légèrement inclinée ;
+  // le texte occupe le bas de l'écran
+  return { offsetX: 0.78, targetY: 1.55, distance: 11.2, tilt: 0.3 };
+}
 
 export interface HeroFrameInput {
   readonly elapsed: number;
   readonly delta: number;
+  /** progression de sortie de la section d'ouverture (0 → 1), lue hors React */
   readonly progress: number;
-  /** flottement et parallaxe suspendus par l'utilisateur (WCAG 2.2.2) */
+  /** rotation et parallaxe suspendues par l'utilisateur (WCAG 2.2.2) */
   readonly paused: boolean;
   readonly pointer: THREE.Vector2;
   readonly camera: THREE.Camera;
-  readonly viewport: { readonly width: number; readonly height: number };
-  readonly labels: { readonly cervical: HTMLElement | null; readonly lumbar: HTMLElement | null };
+  readonly scene: THREE.Scene;
+  readonly layout: HeroLayout;
 }
 
-const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
+const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+const easeOut = (t: number) => 1 - Math.pow(1 - clamp01(t), 3);
+const easeInOut = (t: number) => {
+  const x = clamp01(t);
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+};
 
-export function stepForProgress(p: number): HeroStep {
-  return p < 0.34 ? 0 : p < 0.68 ? 1 : 2;
-}
+/** Durée de l'entrée en lumière (secondes). */
+export const HERO_ENTRANCE = 2.6;
+
+/** Vue de trois quarts profil : face antérieure tournée vers le texte, courbures visibles. */
+const BASE_YAW = -1.05;
 
 export class HeroSpineController {
   readonly materials: AnatomyMaterials;
   readonly spine: SpineModel;
+  /** objet à ajouter à la scène : colonne + éclairage piloté */
   readonly rig = new THREE.Group();
-  private readonly assembly: { obj: THREE.Object3D; base: THREE.Vector3 }[] = [];
-  private step: HeroStep | -1 = -1;
-  private readonly tmp = new THREE.Vector3();
+  private readonly holder = new THREE.Group();
+  private readonly turntable = new THREE.Group();
+  private readonly settle: { obj: THREE.Object3D; base: THREE.Vector3; order: number }[] = [];
+  private readonly lights: { light: THREE.Light; full: number }[] = [];
   private startedAt: number | null = null;
+  private spin = 0;
+  private yaw = BASE_YAW;
   private readonly look = new THREE.Vector3();
 
   /** Construction découpée (aucune tâche longue sur le fil principal). */
-  static async create(detail: Detail, reducedMotion: boolean, offsetX: number, signal?: AbortSignal): Promise<HeroSpineController> {
+  static async create(detail: Detail, reducedMotion: boolean, signal?: AbortSignal): Promise<HeroSpineController> {
     const materials = createAnatomyMaterials();
     try {
       const spine = await runAsync(spineBuilder(detail, materials), 8, signal);
-      return new HeroSpineController(materials, spine, reducedMotion, offsetX);
+      return new HeroSpineController(materials, spine, reducedMotion);
     } catch (e) {
       materials.dispose();
       throw e;
@@ -55,91 +89,84 @@ export class HeroSpineController {
     materials: AnatomyMaterials,
     spine: SpineModel,
     private readonly reducedMotion: boolean,
-    private readonly offsetX: number,
   ) {
     this.materials = materials;
     this.spine = spine;
-    const holder = new THREE.Group();
-    holder.scale.setScalar(0.01); // 1 unité = 10 cm
-    holder.position.set(0, -2.55, 0);
-    holder.add(this.spine.root);
-    this.rig.add(holder);
-    this.rig.position.x = offsetX;
-    this.rig.rotation.y = -0.95;
+    this.holder.scale.setScalar(0.01); // 1 unité = 10 cm
+    this.holder.position.set(0, -2.55, 0);
+    this.holder.add(spine.root);
+    this.turntable.add(this.holder);
+    this.rig.add(this.turntable);
+    this.turntable.rotation.y = BASE_YAW;
 
-    const push = (obj: THREE.Object3D | null) => {
-      if (obj) this.assembly.push({ obj, base: obj.position.clone() });
-    };
-    push(this.spine.sacrum);
-    for (let i = this.spine.segments.length - 1; i >= 0; i--) {
-      const seg = this.spine.segments[i]!;
-      push(seg.disc);
-      push(seg.mesh);
+    // éclairage latéral (relief), contre-jour chaud ; la lumière « monte » pendant l'entrée
+    const hemi = new THREE.HemisphereLight("#fff7ec", "#9d9384", 0.42);
+    const key = new THREE.DirectionalLight("#fff3e2", 2.9);
+    key.position.set(-6, 7, 5);
+    const rim = new THREE.DirectionalLight("#e8bf90", 2.4);
+    rim.position.set(6, 4, -6);
+    const fill = new THREE.PointLight("#ffffff", 3.5, 16);
+    fill.position.set(3, -2, 6);
+    for (const [light, full] of [
+      [hemi, 0.42],
+      [key, 2.9],
+      [rim, 2.4],
+      [fill, 3.5],
+    ] as const) {
+      this.lights.push({ light, full });
+      this.rig.add(light);
     }
-  }
 
-  private applyStep(next: HeroStep, labels: HeroFrameInput["labels"]): void {
-    if (this.step === next) return;
-    this.step = next;
-    const { bone, boneDim, highlight } = this.materials;
-    for (const seg of this.spine.segments) {
-      const on = (next === 1 && seg.region === "cervical") || (next === 2 && (seg.label === "L4" || seg.label === "L5"));
-      seg.mesh.material = next === 0 ? bone : on ? highlight : boneDim;
-    }
-    this.spine.sacrum.material = next === 2 ? highlight : next === 0 ? bone : boneDim;
-    this.spine.coccyx.material = this.spine.sacrum.material;
-    if (labels.cervical) labels.cervical.dataset.on = String(next === 1);
-    if (labels.lumbar) labels.lumbar.dataset.on = String(next === 2);
+    // apparition de haut en bas : C1 en premier, sacrum en dernier
+    spine.segments.forEach((seg, i) => {
+      this.settle.push({ obj: seg.mesh, base: seg.mesh.position.clone(), order: i });
+      if (seg.disc) this.settle.push({ obj: seg.disc, base: seg.disc.position.clone(), order: i + 0.5 });
+    });
+    this.settle.push({ obj: spine.sacrum, base: spine.sacrum.position.clone(), order: spine.segments.length + 1 });
+    this.settle.push({ obj: spine.coccyx, base: spine.coccyx.position.clone(), order: spine.segments.length + 2 });
   }
 
   update(input: HeroFrameInput): void {
-    const { delta, progress: p, pointer, camera, viewport, labels } = input;
-    // l'assemblage démarre au premier rendu, pas au montage du Canvas
+    const { delta, progress: p, pointer, camera, scene, layout } = input;
     if (this.startedAt === null) this.startedAt = input.elapsed;
     const elapsed = input.elapsed - this.startedAt;
+    const still = this.reducedMotion;
 
-    // 1. assemblage scientifique, de bas en haut
-    this.assembly.forEach((item, i) => {
-      const t = this.reducedMotion ? 1 : easeOut((elapsed - 0.15 - i * 0.04) / 0.8);
-      item.obj.position.set(item.base.x, item.base.y - (1 - t) * 70, item.base.z + (1 - t) * 18);
-      item.obj.scale.setScalar(0.55 + 0.45 * t);
-      item.obj.visible = t > 0.001;
-    });
+    // 1. entrée en lumière : intensités et environnement montent doucement
+    const light = still ? 1 : easeInOut(elapsed / HERO_ENTRANCE);
+    for (const { light: l, full } of this.lights) l.intensity = full * (0.08 + 0.92 * light);
+    scene.environmentIntensity = 0.12 + 0.88 * light;
 
-    // 2. étapes de lecture
-    this.applyStep(stepForProgress(p), labels);
+    // 2. les vertèbres se posent l'une après l'autre (amplitude faible, sans effet gratuit)
+    for (const item of this.settle) {
+      const t = still ? 1 : easeOut((elapsed - 0.15 - item.order * 0.035) / 1.3);
+      item.obj.position.set(item.base.x, item.base.y + (1 - t) * 26, item.base.z + (1 - t) * 10);
+      item.obj.scale.setScalar(0.9 + 0.1 * t);
+    }
 
-    // 3. flottement + parallaxe souris (amplitude limitée)
-    const k = 1 - Math.pow(0.0015, delta);
-    const calm = this.reducedMotion || input.paused;
-    const float = calm ? 0 : Math.sin(elapsed * 0.45) * 0.08;
-    this.rig.rotation.y = THREE.MathUtils.lerp(this.rig.rotation.y, -0.95 + (input.paused ? 0 : pointer.x * 0.22) + float + p * 0.9, k);
-    this.rig.rotation.x = THREE.MathUtils.lerp(this.rig.rotation.x, -pointer.y * 0.06, k);
-    this.rig.position.y = THREE.MathUtils.lerp(this.rig.position.y, calm ? 0 : Math.sin(elapsed * 0.6) * 0.06, k);
+    // 3. rotation lente et naturelle autour d'une vue de trois quarts profil (les courbures
+    //    restent toujours lisibles) + réaction discrète au pointeur
+    const k = 1 - Math.pow(0.002, delta);
+    const calm = still || input.paused;
+    if (!calm) this.spin += delta * 0.21;
+    const sway = Math.sin(this.spin) * 0.6;
+    const targetYaw = BASE_YAW + sway + (calm ? 0 : pointer.x * 0.3) + p * 0.6;
+    this.yaw = THREE.MathUtils.lerp(this.yaw, targetYaw, k);
+    this.turntable.rotation.y = this.yaw;
+    this.rig.rotation.x = THREE.MathUtils.lerp(this.rig.rotation.x, calm ? 0 : -pointer.y * 0.07, k);
+    this.rig.rotation.z = THREE.MathUtils.lerp(this.rig.rotation.z, layout.tilt, k);
+    const float = calm ? 0 : Math.sin(elapsed * 0.5) * 0.05;
+    this.rig.position.x = THREE.MathUtils.lerp(this.rig.position.x, layout.offsetX, k);
+    this.rig.position.y = THREE.MathUtils.lerp(this.rig.position.y, float + p * 1.6, k);
 
-    // 4. caméra : accompagne la structure vers la région commentée
-    const step = stepForProgress(p);
-    const focusY = step === 0 ? 0.1 : step === 1 ? 2.4 : -1.6;
-    const dist = step === 0 ? 17 : 12;
-    const camX = step === 0 ? 0 : this.offsetX * 0.35;
-    const k2 = 1 - Math.pow(0.02, delta);
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, camX, k2);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, focusY + 0.6, k2);
-    camera.position.z = THREE.MathUtils.lerp(camera.position.z, dist, k2);
-    this.look.set(camera.position.x, THREE.MathUtils.lerp(this.look.y, focusY, k2), 0);
+    // 4. caméra : léger travelling avant pendant l'entrée, recul à la sortie
+    const dolly = still ? 0 : (1 - easeOut(elapsed / (HERO_ENTRANCE + 0.6))) * 2.2;
+    const k2 = 1 - Math.pow(0.03, delta);
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, layout.offsetX * 0.18, k2);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, layout.targetY + 0.5, k2);
+    camera.position.z = THREE.MathUtils.lerp(camera.position.z, layout.distance + dolly + p * 2.5, k2);
+    this.look.set(camera.position.x, layout.targetY, 0);
     camera.lookAt(this.look);
-
-    // 5. légendes DOM positionnées par projection
-    this.place(this.spine.segments[3]?.mesh, labels.cervical, 18, camera, viewport);
-    this.place(this.spine.segments[this.spine.segments.length - 1]?.mesh, labels.lumbar, 26, camera, viewport);
-  }
-
-  private place(mesh: THREE.Object3D | undefined, el: HTMLElement | null, dx: number, camera: THREE.Camera, viewport: HeroFrameInput["viewport"]) {
-    if (!mesh || !el) return;
-    mesh.getWorldPosition(this.tmp).project(camera);
-    const x = (this.tmp.x * 0.5 + 0.5) * viewport.width + dx;
-    const y = (-this.tmp.y * 0.5 + 0.5) * viewport.height;
-    el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
   }
 
   dispose(): void {

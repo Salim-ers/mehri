@@ -16,7 +16,7 @@ export function RegionGlyph({ region, className = "" }: { region: RegionId; clas
   const z = ZONES[region];
   return (
     <svg viewBox="0 0 100 220" className={className} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round">
-      <ellipse cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry} fill="var(--color-bronze)" fillOpacity="0.22" stroke="var(--color-bronze)" strokeWidth="0.8" />
+      <ellipse cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry} fill="var(--color-bronze-light)" fillOpacity="0.25" stroke="var(--color-bronze-light)" strokeWidth="0.8" />
       <g opacity="0.7">
         <ellipse cx="50" cy="14" rx="8.5" ry="10.5" />
         <path d="M50 25 V102" strokeDasharray="2 2" />

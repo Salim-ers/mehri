@@ -2,15 +2,16 @@
 
 import dynamic from "next/dynamic";
 import { useRef, useState, type ReactNode } from "react";
+import { PauseIcon, PlayIcon } from "@/components/shared/Icons";
 import type { RegionId } from "@/content/anatomy";
 import { useDeviceTier, useInView, useReducedMotion, useWebGLSupport } from "@/hooks/use-environment";
 
 const AtlasScene = dynamic(() => import("./AtlasScene"), { ssr: false, loading: () => null });
 
 /**
- * Illustration 3D d'une région (fiches motifs) : chargée seulement lorsqu'elle
- * approche de l'écran, rendue uniquement lorsqu'elle est visible. Le glyphe
- * vectoriel `fallback` reste affiché sans WebGL ou pendant le chargement.
+ * Illustration 3D d'une région (fiches motifs), en rendu radiographique :
+ * chargée à l'approche de l'écran, rendue uniquement lorsqu'elle est visible.
+ * `fallback` reste affiché sans WebGL ou pendant le chargement.
  */
 export function RegionViewer({ region, fallback }: { region: RegionId; fallback: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,7 +28,17 @@ export function RegionViewer({ region, fallback }: { region: RegionId; fallback:
       <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${show ? "opacity-0" : "opacity-100"}`}>{fallback}</div>
       {show ? (
         <div className="absolute inset-0">
-          <AtlasScene selected={region} playing={playing} detail={tier === "high" ? "high" : "low"} active={visible} interactive={false} onSelect={() => undefined} onHover={() => undefined} />
+          <AtlasScene
+            look="xray"
+            selected={region}
+            playing={playing}
+            detail={tier === "high" ? "high" : "low"}
+            active={visible}
+            interactive={false}
+            reducedMotion={reduced}
+            onSelect={() => undefined}
+            onHover={() => undefined}
+          />
         </div>
       ) : null}
       {show ? (
@@ -35,9 +46,10 @@ export function RegionViewer({ region, fallback }: { region: RegionId; fallback:
           type="button"
           onClick={() => setPlayPref(!playing)}
           aria-pressed={!playing}
-          className="caption-mono absolute bottom-3 right-3 z-10 flex min-h-11 items-center gap-2 rounded-full border border-umber/25 bg-ivory/80 px-4 text-umber backdrop-blur hover:border-umber"
+          className="absolute bottom-3 right-3 z-10 flex min-h-11 items-center gap-2 rounded-full border border-bone/20 bg-anthracite/60 px-4 text-sm text-bone backdrop-blur hover:border-bone/60"
         >
-          {playing ? "❚❚ Pause" : "▶ Lire le mouvement"}
+          {playing ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="h-3.5 w-3.5" />}
+          {playing ? "Pause" : "Lire le mouvement"}
         </button>
       ) : null}
     </div>

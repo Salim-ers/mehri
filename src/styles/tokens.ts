@@ -1,22 +1,24 @@
 /**
- * Design tokens « Atlas du mouvement » — source unique, reprise dans globals.css
- * et dans les matériaux 3D. Palette affinée à partir des photos du cabinet
- * (bureau noyer, sol en pierre, murs blancs) et du logo (bronze).
+ * Design tokens — source unique, reprise dans globals.css (@theme) et dans les
+ * matériaux 3D. Direction : blanc cassé, ivoire et tons minéraux, anthracite,
+ * un seul accent chaud (le bronze du logo) et une lumière « radiographique »
+ * froide réservée aux visualisations sur fond sombre.
  */
 export const colors = {
-  paper: "#FCFBF8",
-  ivory: "#F6F1E9",
-  stone: "#DCD0BF",
-  stoneDeep: "#B8A486",
-  walnut: "#6A3A1E",
-  umber: "#241A15",
-  graphite: "#161716",
-  bronze: "#A9784B",
-  bronzeLight: "#D6B48C",
-  bronzeInk: "#7A4F2C",
-  ink: "#1F1915",
-  inkSoft: "#5A4E45",
-  bone: "#EDE4D6",
+  paper: "#FBFAF7",
+  ivory: "#F3F0EA",
+  mineral: "#E5E0D7",
+  mineralDeep: "#C8C0B3",
+  stone: "#9A9286",
+  anthracite: "#1B1D1F",
+  graphite: "#26292C",
+  ink: "#18191A",
+  inkSoft: "#55575A",
+  bronze: "#A27A53",
+  bronzeInk: "#7A5535",
+  bronzeLight: "#D5BA94",
+  bone: "#ECE7DF",
+  xray: "#DCE7EA",
   review: "#7A4E00",
   reviewBg: "#FFF1CC",
 } as const;

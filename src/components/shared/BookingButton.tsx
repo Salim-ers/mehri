@@ -5,36 +5,40 @@ import { PhoneIcon } from "./Icons";
 
 interface BookingButtonProps {
   readonly variant?: "primary" | "light" | "ghost";
+  readonly size?: "md" | "lg";
   readonly className?: string;
-  /** libellé court (« Prendre rendez-vous ») ou action explicite (« Appeler le… ») */
-  readonly mode?: "page" | "direct";
+  /**
+   * « sheet » : lien vers /rendez-vous qui ouvre le panneau de réservation (avec JavaScript) ;
+   * « direct » : déclenche directement l'action réelle (lien en ligne ou appel).
+   */
+  readonly mode?: "sheet" | "direct";
   readonly label?: string;
 }
 
 export const bookingAction = resolveBookingAction(practice.onlineBookingUrl, practice.phone);
 
-/**
- * Appel à l'action de réservation.
- * mode « page » : mène à la page Rendez-vous (explications + action).
- * mode « direct » : déclenche directement l'action réelle (lien en ligne ou appel).
- */
-export function BookingButton({ variant = "primary", className = "", mode = "page", label }: BookingButtonProps) {
-  const cls = `btn btn-${variant} ${className}`;
-  if (mode === "page") {
+/** Appel à l'action de réservation — toujours une action réelle, jamais un faux créneau. */
+export function BookingButton({ variant = "primary", size = "md", className = "", mode = "sheet", label }: BookingButtonProps) {
+  const cls = `btn btn-${variant} ${size === "lg" ? "btn-lg" : ""} ${className}`;
+  const action = bookingAction;
+  if (mode === "sheet" && action.kind !== "online") {
     return (
-      <Link href="/rendez-vous" className={cls}>
+      <Link href="/rendez-vous" data-booking className={cls}>
         {label ?? "Prendre rendez-vous"}
-        <span className="btn-arrow" aria-hidden="true">→</span>
+        <span className="btn-arrow" aria-hidden="true">
+          →
+        </span>
       </Link>
     );
   }
-  const action = bookingAction;
   if (action.kind === "online") {
     return (
       <a href={action.href} className={cls} target="_blank" rel="noopener noreferrer">
         {label ?? action.label}
         <span className="sr-only"> (nouvel onglet)</span>
-        <span className="btn-arrow" aria-hidden="true">↗</span>
+        <span className="btn-arrow" aria-hidden="true">
+          ↗
+        </span>
       </a>
     );
   }

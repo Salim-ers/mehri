@@ -1,5 +1,8 @@
+import Image from "next/image";
 import { BookingButton } from "@/components/shared/BookingButton";
-import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
+import { plates } from "@/content/imagery";
+import { ImageCredit } from "@/features/imagery/ScrollCrossfade";
+import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { PendingBadge } from "@/components/shared/Pending";
 import { RedFlags } from "@/components/shared/RedFlags";
 import { Reveal } from "@/components/shared/Reveal";
@@ -25,26 +28,43 @@ export default function DeroulementPage() {
           __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Déroulement d'une consultation", path: "/deroulement-consultation" }])),
         }}
       />
-      <PlateHeader
-        plate="VI"
-        latin="Ordo consultationis"
+      <PageIntro
+        eyebrow="Déroulement"
         title={<Lines lines={["Une consultation,", <>en <em>quatre temps.</em></>]} />}
-        lede={
-          <p>
-            De l&apos;échange initial aux conseils de fin de séance, chaque étape a sa raison d&apos;être. Les photographies montrent le cabinet
-            et le praticien en situation de consultation. <PendingBadge fact={practice.patientImageConsent} />
-          </p>
-        }
+        lede={<p>De l&apos;échange initial aux conseils de fin de séance, chaque étape a sa raison d&apos;être.</p>}
       />
+      <div className="px-[var(--gutter)] pb-20 md:pb-28">
+        <figure className="wrap">
+          <Reveal variant="mask">
+            <div className="relative h-[52svh] min-h-[320px] overflow-hidden rounded-[4px] bg-[#3a3a3b] md:h-[64vh]">
+              <Image
+                src={plates.vertebra.src}
+                alt={plates.vertebra.alt}
+                fill
+                sizes="(min-width: 1600px) 1600px, 100vw"
+                className="parallax-img object-cover"
+                style={{ objectPosition: "50% 58%" }}
+              />
+            </div>
+          </Reveal>
+          <figcaption>
+            <ImageCredit image={plates.vertebra} />
+          </figcaption>
+        </figure>
+      </div>
       <section aria-label="Étapes de la consultation" className="px-[var(--gutter)] pb-28 md:pb-40">
-        <ConsultationTimeline steps={consultationSteps} />
+        <div className="wrap">
+          <ConsultationTimeline steps={consultationSteps} />
+        </div>
       </section>
-      <section className="bg-paper px-[var(--gutter)] py-20 md:py-28">
-        <div className="mx-auto grid max-w-[110rem] grid-cols-12 gap-x-6 gap-y-10">
-          <Reveal className="col-span-12 lg:col-span-5">
-            <p className="caption-mono text-bronze-ink">Bon à savoir</p>
-            <h2 className="display mt-4 text-[clamp(1.9rem,1.2rem+2.2vw,3.4rem)] text-umber">Avant de venir</h2>
-            <ul className="prose-atlas mt-6 space-y-3">
+      <section aria-labelledby="avant" className="bg-paper px-[var(--gutter)] py-24 md:py-32">
+        <div className="wrap grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
+          <Reveal className="lg:col-span-4">
+            <p className="eyebrow">Bon à savoir</p>
+            <h2 id="avant" className="display mt-5 text-[clamp(2rem,1.3rem+2.2vw,3.4rem)]">
+              Avant de venir
+            </h2>
+            <ul className="prose-body mt-6 space-y-3">
               <li>Prévoyez une tenue confortable ; vous restez libre de garder certains vêtements.</li>
               <li>Apportez, si vous en avez, vos comptes rendus d&apos;examens et ordonnances récentes.</li>
               <li>Signalez vos traitements en cours (notamment anticoagulants) et vos antécédents.</li>
@@ -54,11 +74,11 @@ export default function DeroulementPage() {
                 . <PendingBadge fact={practice.fees} />
               </li>
             </ul>
-            <div className="mt-8">
-              <BookingButton />
+            <div className="mt-9">
+              <BookingButton size="lg" />
             </div>
           </Reveal>
-          <div className="col-span-12 lg:col-span-6 lg:col-start-7">
+          <div className="lg:col-span-7 lg:col-start-6">
             <RedFlags />
           </div>
         </div>

@@ -4,17 +4,22 @@ import { describe, expect, it } from "vitest";
 import { anatomyRegions, REGION_IDS } from "@/content/anatomy";
 import { equipment } from "@/content/equipment";
 import { photos } from "@/content/media";
-import { getMotif, motifs } from "@/content/motifs";
+import { imageryCredits, xrays } from "@/content/imagery";
+import { galleryScenes } from "@/content/media";
+import { getMotif, motifCategories, motifs } from "@/content/motifs";
 import { practice } from "@/content/practice";
 import { approach } from "@/content/practitioner";
-import { consultationSteps, navigation, redFlags } from "@/content/site";
+import { consultationSteps, navigation, redFlags, secondaryPages } from "@/content/site";
 import { practiceJsonLd, serializeJsonLd } from "@/lib/seo";
 
 const root = join(__dirname, "../..");
 
 describe("intégrité du contenu", () => {
+  it("la navigation principale compte six entrées, dans l'ordre demandé", () => {
+    expect(navigation.map((n) => n.label)).toEqual(["Accueil", "L'ostéopathe", "Pourquoi consulter ?", "Corps en mouvement", "Le cabinet", "Prendre rendez-vous"]);
+  });
   it("chaque entrée de navigation correspond à une vraie page", () => {
-    for (const item of navigation) {
+    for (const item of [...navigation, ...secondaryPages]) {
       const file = item.href === "/" ? "src/app/page.tsx" : `src/app${item.href}/page.tsx`;
       expect(existsSync(join(root, file)), file).toBe(true);
     }
@@ -36,6 +41,32 @@ describe("intégrité du contenu", () => {
     expect(anatomyRegions.map((r) => r.id)).toEqual([...REGION_IDS]);
     for (const r of anatomyRegions) expect(getMotif(r.motifSlug), r.id).toBeDefined();
   });
+  it("chaque fiche motif appartient à exactement une catégorie", () => {
+    const all = motifCategories.flatMap((cat) => cat.slugs);
+    expect(new Set(all).size).toBe(all.length);
+    expect([...all].sort()).toEqual(motifs.map((m) => m.slug).sort());
+  });
+  it("aucune photographie ne représente une personne", () => {
+    for (const p of Object.values(photos)) expect(p.showsPerson, p.id).toBe(false);
+    for (const s of galleryScenes) expect(s.photo.showsPerson, s.id).toBe(false);
+    for (const e of equipment) if (e.photo) expect(e.photo.showsPerson, e.id).toBe(false);
+  });
+  it("les photographies de personnes ne sont plus servies par le site", () => {
+    for (const f of ["praticien-portrait.jpg", "praticien-bureau.jpg", "consultation-cervicales.jpg", "consultation-epaule.jpg", "equipement-percussion.jpg", "equipement-applicateur.jpg"]) {
+      expect(existsSync(join(root, "public/images", f)), f).toBe(false);
+    }
+  });
+  it("imagerie : fichier présent, licence commerciale, auteur et source renseignés", () => {
+    const allowed = /^(Domaine public|CC0|CC BY(-SA)? \d\.\d)/;
+    for (const i of [...Object.values(xrays), ...imageryCredits]) {
+      expect(existsSync(join(root, "public", i.src)), i.src).toBe(true);
+      expect(i.credit.license, i.id).toMatch(allowed);
+      expect(i.credit.author.length, i.id).toBeGreaterThan(1);
+      expect(i.credit.sourceUrl, i.id).toMatch(/^https:\/\//);
+      expect(i.credit.licenseUrl, i.id).toMatch(/^https:\/\//);
+    }
+    for (const x of Object.values(xrays)) expect(imageryCredits, x.id).toContain(x);
+  });
   it("toutes les photos référencées existent dans /public", () => {
     for (const p of Object.values(photos)) expect(existsSync(join(root, "public", p.src)), p.src).toBe(true);
   });
@@ -49,7 +80,7 @@ describe("intégrité du contenu", () => {
  * médical usurpé, aucun public non confirmé (nourrissons, grossesse).
  */
 describe("conformité éditoriale", () => {
-  const corpus = JSON.stringify({ motifs, anatomyRegions, equipment, approach, consultationSteps, redFlags, photos });
+  const corpus = JSON.stringify({ motifs, motifCategories, anatomyRegions, equipment, approach, consultationSteps, redFlags, photos, galleryScenes, xrays });
   const forbidden = [
     /guéri(r|son|t)/i,
     /garanti/i,

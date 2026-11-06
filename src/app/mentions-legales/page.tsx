@@ -1,5 +1,6 @@
 import { MissingSlot, PendingBadge } from "@/components/shared/Pending";
-import { PlateHeader } from "@/components/shared/PlateHeader";
+import { PageIntro } from "@/components/shared/PageIntro";
+import { imageryCredits } from "@/content/imagery";
 import { identity, practice } from "@/content/practice";
 import { formatAddress } from "@/lib/contact-links";
 import { hasValue, isNotPublished, type Fact } from "@/lib/facts";
@@ -14,8 +15,8 @@ export const metadata = pageMetadata({
 function Line({ label, fact }: { label: string; fact: Fact<string> }) {
   if (isNotPublished(fact)) return null;
   return (
-    <div className="grid gap-2 border-b border-umber/12 py-4 sm:grid-cols-[14rem_1fr]">
-      <dt className="caption-mono text-ink-soft">{label}</dt>
+    <div className="grid gap-2 border-b border-ink/10 py-4 sm:grid-cols-[14rem_1fr]">
+      <dt className="text-sm text-ink-soft">{label}</dt>
       <dd>{hasValue(fact) ? <>{fact.value} <PendingBadge fact={fact} /></> : <MissingSlot fact={fact}><span className="text-ink-soft">—</span></MissingSlot>}</dd>
     </div>
   );
@@ -29,28 +30,28 @@ export default function MentionsLegalesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Mentions légales", path: "/mentions-legales" }])) }}
       />
-      <PlateHeader plate="—" latin="Notitia legalis" title="Mentions légales" />
+      <PageIntro eyebrow="Informations légales" title="Mentions légales" />
       <div className="px-[var(--gutter)] pb-24">
         <div className="mx-auto max-w-4xl space-y-14">
           <section aria-labelledby="editeur">
-            <h2 id="editeur" className="display text-3xl text-umber">
+            <h2 id="editeur" className="display text-3xl">
               Éditeur du site
             </h2>
-            <dl className="mt-6 border-t border-umber/12">
+            <dl className="mt-6 border-t border-ink/10">
               <Line label="Éditeur" fact={practice.legal.publisher} />
               <Line label="Praticien" fact={practice.practitionerName} />
               <Line label="Profession" fact={practice.title} />
               {address ? (
-                <div className="grid gap-2 border-b border-umber/12 py-4 sm:grid-cols-[14rem_1fr]">
-                  <dt className="caption-mono text-ink-soft">Adresse</dt>
+                <div className="grid gap-2 border-b border-ink/10 py-4 sm:grid-cols-[14rem_1fr]">
+                  <dt className="text-sm text-ink-soft">Adresse</dt>
                   <dd>
                     {address} <PendingBadge fact={practice.address} />
                   </dd>
                 </div>
               ) : null}
               {hasValue(practice.phone) ? (
-                <div className="grid gap-2 border-b border-umber/12 py-4 sm:grid-cols-[14rem_1fr]">
-                  <dt className="caption-mono text-ink-soft">Téléphone</dt>
+                <div className="grid gap-2 border-b border-ink/10 py-4 sm:grid-cols-[14rem_1fr]">
+                  <dt className="text-sm text-ink-soft">Téléphone</dt>
                   <dd>{practice.phone.value.display}</dd>
                 </div>
               ) : null}
@@ -60,20 +61,21 @@ export default function MentionsLegalesPage() {
             </dl>
           </section>
           <section aria-labelledby="hebergeur">
-            <h2 id="hebergeur" className="display text-3xl text-umber">
+            <h2 id="hebergeur" className="display text-3xl">
               Hébergement
             </h2>
-            <dl className="mt-6 border-t border-umber/12">
+            <dl className="mt-6 border-t border-ink/10">
               <Line label="Hébergeur" fact={practice.legal.host} />
             </dl>
           </section>
-          <section aria-labelledby="contenus" className="prose-atlas">
-            <h2 id="contenus" className="display text-3xl text-umber">
+          <section aria-labelledby="contenus" className="prose-body">
+            <h2 id="contenus" className="display text-3xl">
               Contenus et propriété intellectuelle
             </h2>
             <p className="mt-6">
               Les textes, photographies, illustrations et modèles 3D de ce site sont protégés. Les modèles anatomiques 3D sont des créations
               originales réalisées pour ce site ; ils ont une vocation pédagogique et ne constituent pas une représentation médicale exacte.
+              Les photographies du cabinet montrent uniquement les lieux et le matériel.
             </p>
             <p>
               Les informations publiées sont générales et ne remplacent ni une consultation ni un avis médical. L&apos;ostéopathie ne se substitue
@@ -81,6 +83,38 @@ export default function MentionsLegalesPage() {
             </p>
             <p>Conception et développement : QuadCore.</p>
           </section>
+          {imageryCredits.length ? (
+            <section aria-labelledby="credits" className="prose-body">
+              <h2 id="credits" className="display text-3xl">
+                Crédits iconographiques
+              </h2>
+              <p className="mt-6">
+                Les radiographies et illustrations anatomiques suivantes sont utilisées à titre d&apos;illustration, sous licence libre. Elles ne
+                proviennent pas de patients du cabinet.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {imageryCredits.map((c) => (
+                  <li key={c.src}>
+                    {c.subject} — {c.credit.author},{" "}
+                    <a href={c.credit.licenseUrl} target="_blank" rel="noopener noreferrer license" className="link-line">
+                      {c.credit.license}
+                    </a>{" "}
+                    (
+                    <a href={c.credit.sourceUrl} target="_blank" rel="noopener noreferrer" className="link-line">
+                      source
+                    </a>
+                    )
+                    {c.credit.modified
+                      ? c.credit.license.includes("SA")
+                        ? ", image recadrée et retouchée, diffusée sous la même licence"
+                        : ", image recadrée et retouchée"
+                      : ""}
+                    .
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
       </div>
     </>

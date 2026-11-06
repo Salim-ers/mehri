@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Lines, PlateHeader } from "@/components/shared/PlateHeader";
+import { PlusIcon } from "@/components/shared/Icons";
+import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { Reveal } from "@/components/shared/Reveal";
 import { anatomyRegions } from "@/content/anatomy";
 import { getMotif } from "@/content/motifs";
@@ -8,9 +9,9 @@ import { AtlasExplorer } from "@/features/anatomy/components/AtlasExplorer";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Le corps en mouvement — atlas anatomique 3D",
+  title: "Corps en mouvement — explorateur anatomique 3D",
   description:
-    "Explorez en 3D la colonne vertébrale, les cervicales, les épaules, le thorax, le bassin, les hanches et les genoux : un atlas pédagogique proposé par le cabinet d'ostéopathie de Creil.",
+    "Explorez en 3D la colonne vertébrale, les cervicales, les épaules, le thorax, le bassin, les hanches et les genoux, et observez leurs mouvements : un contenu pédagogique du cabinet d'ostéopathie de Creil.",
   path: "/le-corps-en-mouvement",
 });
 
@@ -20,55 +21,64 @@ export default function AtlasPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Le corps en mouvement", path: "/le-corps-en-mouvement" }])),
+          __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Corps en mouvement", path: "/le-corps-en-mouvement" }])),
         }}
       />
-      <PlateHeader
-        plate="II"
-        latin="Systema skeletale"
+      <PageIntro
+        eyebrow="Corps en mouvement"
         title={<Lines lines={["Le corps", <>en <em>mouvement.</em></>]} />}
-        lede={
-          <p>
-            Un atlas anatomique interactif pour comprendre comment les structures du corps s&apos;articulent. Faites pivoter le squelette,
-            choisissez une région et observez son mouvement. Ce contenu est éducatif : il ne remplace pas un examen.
-          </p>
-        }
+        lede={<p>Choisissez une région du squelette et observez comment elle bouge. Un contenu éducatif, qui ne remplace pas un examen.</p>}
       />
-      <Suspense fallback={<div className="min-h-[70svh] bg-umber" aria-hidden="true" />}>
+      <Suspense fallback={<div className="min-h-[70svh] bg-mineral" aria-hidden="true" />}>
         <AtlasExplorer />
       </Suspense>
 
-      {/* Version textuelle complète : accessible et indexable même sans 3D */}
+      {/* Version textuelle complète : accessible et indexable, même sans 3D */}
       <section aria-labelledby="regions-texte" className="px-[var(--gutter)] py-24 md:py-32">
-        <div className="mx-auto max-w-[110rem]">
-          <Reveal>
-            <p className="caption-mono text-bronze-ink">Légendes de l&apos;atlas</p>
-            <h2 id="regions-texte" className="display mt-4 max-w-3xl text-[clamp(2rem,1.2rem+3vw,4rem)] text-umber">
-              Les sept régions, <em>en texte.</em>
+        <div className="wrap grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
+          <Reveal className="lg:col-span-4">
+            <p className="eyebrow">En savoir plus</p>
+            <h2 id="regions-texte" className="display mt-5 text-[clamp(2.1rem,1.3rem+2.8vw,3.9rem)]">
+              Les sept régions, <em>en détail.</em>
             </h2>
           </Reveal>
-          <div className="mt-14 grid gap-x-10 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
-            {anatomyRegions.map((r, i) => {
+          <div className="lg:col-span-7 lg:col-start-6">
+            {anatomyRegions.map((r) => {
               const motif = getMotif(r.motifSlug);
               return (
-                <Reveal as="article" key={r.id} delay={(i % 3) * 80} className="border-t border-umber/15 pt-6" id={`region-${r.id}`}>
-                  <p className="caption-mono text-bronze-ink">
-                    Planche {r.plate} · <span lang="la" className="italic normal-case tracking-normal">{r.latin}</span>
-                  </p>
-                  <h3 className="display mt-3 text-3xl text-umber">{r.label}</h3>
-                  <p className="prose-atlas mt-4">{r.summary}</p>
-                  <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">{r.movement.caption}</p>
-                  <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[0.95rem]">
-                    <Link href={`/le-corps-en-mouvement?region=${r.id}#atlas`} className="link-atlas text-umber">
-                      Voir en 3D
-                    </Link>
-                    {motif ? (
-                      <Link href={`/motifs-de-consultation/${motif.slug}`} className="link-atlas text-umber">
-                        {motif.title}
+                <details key={r.id} id={`region-${r.id}`} className="disclosure group border-b border-ink/10 first:border-t">
+                  <summary className="flex min-h-11 items-center justify-between gap-6 py-6">
+                    <h3 className="display text-[clamp(1.6rem,1.3rem+1vw,2.3rem)]">{r.label}</h3>
+                    <PlusIcon className="disclosure-icon h-5 w-5 shrink-0 text-bronze-ink" />
+                  </summary>
+                  <div className="pb-8">
+                    <p className="lede">{r.summary}</p>
+                    <div className="prose-body mt-4">
+                      {r.body.map((p) => (
+                        <p key={p}>{p}</p>
+                      ))}
+                    </div>
+                    <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
+                      {r.keyFacts.map((f) => (
+                        <div key={f.label}>
+                          <dt className="text-sm text-ink-soft">{f.label}</dt>
+                          <dd className="display mt-1 text-2xl">{f.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className="mt-6 text-[0.98rem] text-ink-soft">{r.movement.caption}</p>
+                    <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+                      <Link href={`/le-corps-en-mouvement?region=${r.id}#atlas`} className="link-more text-ink">
+                        Voir en 3D
                       </Link>
-                    ) : null}
+                      {motif ? (
+                        <Link href={`/motifs-de-consultation/${motif.slug}`} className="link-line text-ink">
+                          {motif.title}
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
-                </Reveal>
+                </details>
               );
             })}
           </div>

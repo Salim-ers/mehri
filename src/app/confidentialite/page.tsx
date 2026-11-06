@@ -1,5 +1,5 @@
 import { bookingAction } from "@/components/shared/BookingButton";
-import { PlateHeader } from "@/components/shared/PlateHeader";
+import { PageIntro } from "@/components/shared/PageIntro";
 import { identity, practice } from "@/content/practice";
 import { formatAddress } from "@/lib/contact-links";
 import { hasValue } from "@/lib/facts";
@@ -18,11 +18,11 @@ export default function ConfidentialitePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Confidentialité", path: "/confidentialite" }])) }}
       />
-      <PlateHeader plate="—" latin="Secretum" title="Confidentialité" />
+      <PageIntro eyebrow="Informations légales" title="Confidentialité" />
       <div className="px-[var(--gutter)] pb-24">
-        <div className="prose-atlas mx-auto max-w-3xl space-y-10">
+        <div className="prose-body mx-auto max-w-3xl space-y-10">
           <section aria-labelledby="donnees">
-            <h2 id="donnees" className="display text-3xl text-umber">
+            <h2 id="donnees" className="display text-3xl text-ink">
               Données collectées
             </h2>
             <p className="mt-5">
@@ -44,7 +44,7 @@ export default function ConfidentialitePage() {
             </p>
           </section>
           <section aria-labelledby="cookies">
-            <h2 id="cookies" className="display text-3xl text-umber">
+            <h2 id="cookies" className="display text-3xl text-ink">
               Cookies et services tiers
             </h2>
             <p className="mt-5">
@@ -53,12 +53,12 @@ export default function ConfidentialitePage() {
               d&apos;itinéraire ouvrent les services choisis (Google Maps, Plans d&apos;Apple, Waze) dans un nouvel onglet.
             </p>
             <p>
-              Le site utilise le stockage de session de votre navigateur pour ne pas rejouer l&apos;animation d&apos;ouverture : cette information
-              technique ne vous identifie pas et disparaît à la fermeture de l&apos;onglet.
+              Le site n&apos;utilise ni cookie, ni stockage local pour son fonctionnement : les animations et la visualisation 3D s&apos;exécutent
+              entièrement dans votre navigateur, sans transmission de données.
             </p>
           </section>
           <section aria-labelledby="droits">
-            <h2 id="droits" className="display text-3xl text-umber">
+            <h2 id="droits" className="display text-3xl text-ink">
               Vos droits
             </h2>
             <p className="mt-5">

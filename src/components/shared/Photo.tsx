@@ -1,42 +1,43 @@
 import Image from "next/image";
-import type { Photo } from "@/content/media";
+import type { Photo as PhotoData } from "@/content/media";
 import { Reveal } from "./Reveal";
 
-interface AtlasPhotoProps {
-  readonly photo: Photo;
+interface PhotoProps {
+  readonly photo: PhotoData;
   /** taille d'affichage pour le choix de variante responsive */
   readonly sizes: string;
   readonly className?: string;
   readonly priority?: boolean;
+  /** légende discrète sous l'image */
   readonly caption?: boolean | string;
-  readonly figureNumber?: string;
   readonly reveal?: boolean;
   readonly delay?: number;
   readonly focus?: readonly [number, number];
   readonly zoom?: number;
   readonly aspect?: string;
+  /** léger mouvement de parallaxe au défilement (CSS, désactivé en mouvement réduit) */
+  readonly parallax?: boolean;
+  readonly rounded?: boolean;
 }
 
-/**
- * Photographie éditoriale : cadrage par point focal, masque d'ouverture,
- * légende façon planche d'atlas (« Fig. »).
- */
-export function AtlasPhoto({
+/** Photographie d'architecture ou de matériel : cadrage par point focal, ouverture douce. */
+export function Photo({
   photo,
   sizes,
   className = "",
   priority = false,
   caption = false,
-  figureNumber,
   reveal = true,
   delay = 0,
   focus,
   zoom = 1,
   aspect,
-}: AtlasPhotoProps) {
+  parallax = false,
+  rounded = true,
+}: PhotoProps) {
   const [fx, fy] = focus ?? photo.focus;
   const img = (
-    <div className="relative h-full w-full overflow-hidden bg-stone" style={aspect ? { aspectRatio: aspect } : undefined}>
+    <div className={`relative h-full w-full overflow-hidden bg-mineral ${rounded ? "rounded-[3px]" : ""}`} style={aspect ? { aspectRatio: aspect } : undefined}>
       <Image
         src={photo.src}
         alt={photo.alt}
@@ -44,8 +45,8 @@ export function AtlasPhoto({
         sizes={sizes}
         priority={priority}
         quality={80}
-        className="object-cover"
-        style={{ objectPosition: `${fx}% ${fy}%`, transform: zoom !== 1 ? `scale(${zoom})` : undefined, transformOrigin: `${fx}% ${fy}%` }}
+        className={`object-cover ${parallax ? "parallax-img" : ""}`}
+        style={{ objectPosition: `${fx}% ${fy}%`, scale: zoom !== 1 ? String(zoom) : undefined, transformOrigin: `${fx}% ${fy}%` }}
       />
     </div>
   );
@@ -61,12 +62,7 @@ export function AtlasPhoto({
       ) : (
         <div className="relative min-h-0 flex-1">{img}</div>
       )}
-      {caption ? (
-        <figcaption className="caption-mono mt-3 flex gap-3 text-ink-soft">
-          {figureNumber ? <span className="text-bronze-ink">Fig. {figureNumber}</span> : null}
-          <span className="normal-case tracking-normal">{captionText}</span>
-        </figcaption>
-      ) : null}
+      {caption ? <figcaption className="mt-3 text-[0.82rem] text-ink-soft">{captionText}</figcaption> : null}
     </figure>
   );
 }

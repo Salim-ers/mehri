@@ -40,11 +40,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     formats: ["image/avif", "image/webp"],
-    // Sources photo : 941 px de large maximum. Aucune variante plus large n'est générée
-    // (pas d'upscale présenté comme 4K natif).
-    deviceSizes: [360, 480, 640, 750, 828, 941],
+    // Photos du cabinet : 941 px de large ; imagerie anatomique : 2400 px maximum.
+    // L'optimiseur n'agrandit jamais une source (aucune variante plus large que l'original).
+    deviceSizes: [360, 480, 640, 750, 828, 941, 1200, 1600, 2048, 2400],
     imageSizes: [96, 160, 240, 320],
-    qualities: [70, 80, 90],
+    qualities: [70, 75, 80, 90],
   },
   turbopack: {
     rules: {

@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { REGION_IDS } from "@/content/anatomy";
-import { createAnatomyMaterials } from "@/features/anatomy/model/materials";
+import { createAnatomyMaterials, createXRayMaterials, XRayScan } from "@/features/anatomy/model/materials";
 import { SkeletonAnimator } from "@/features/anatomy/model/motion";
 import { createSkeleton } from "@/features/anatomy/model/skeleton";
 import { computeFrames, sagittalOffset, SPINE_LENGTH_MM, VERTEBRAE } from "@/features/anatomy/model/spine-profile";
 import { createSpine } from "@/features/anatomy/model/spine";
-import { stepForProgress } from "@/features/anatomy/model/hero-controller";
+import { heroLayout } from "@/features/anatomy/model/hero-controller";
+import { xrayFraming } from "@/features/anatomy/model/xray-controller";
 
 describe("profil rachidien", () => {
   it("compte 7 cervicales, 12 thoraciques et 5 lombaires", () => {
@@ -69,7 +70,47 @@ describe("modèles 3D procéduraux", () => {
     for (let i = 0; i < 90; i++) animator.update(1 / 30, true);
     expect(knee.quaternion.angleTo(rest)).toBeLessThan(1e-6);
   });
-  it("découpe la narration d'accueil en trois temps", () => {
-    expect([0, 0.2, 0.4, 0.6, 0.8, 1].map(stepForProgress)).toEqual([0, 0, 1, 1, 2, 2]);
+  it("adapte la composition de la colonne au format d'écran (pas une simple réduction)", () => {
+    const desktop = heroLayout(1440, 900);
+    const phone = heroLayout(390, 844);
+    const ultrawide = heroLayout(3440, 1440);
+    expect(desktop.offsetX).toBeGreaterThan(1.5); // colonne à droite du texte
+    expect(phone.offsetX).toBeLessThan(desktop.offsetX); // colonne dans la moitié haute, près du bord droit
+    expect(phone.targetY).toBeGreaterThan(desktop.targetY);
+    expect(phone.distance).toBeLessThan(desktop.distance); // cadrage plus serré
+    expect(ultrawide.offsetX).toBeGreaterThan(desktop.offsetX);
+  });
+  it("cadre le squelette radiographique entier sur grand écran, le tronc sur mobile", () => {
+    const wide = xrayFraming(800, 900, 32);
+    const narrow = xrayFraming(390, 700, 32);
+    expect(wide.targetY).toBeLessThan(narrow.targetY);
+    expect(wide.distance).toBeGreaterThan(narrow.distance);
+  });
+});
+
+describe("rendu radiographique", () => {
+  it("le squelette se construit avec les matériaux radiographiques", () => {
+    const xray = createXRayMaterials();
+    const model = createSkeleton("low", xray);
+    expect(model.selectable.length).toBeGreaterThan(10);
+    xray.dispose();
+  });
+  it("le balayage révèle la structure de haut en bas puis la laisse entièrement visible", () => {
+    const { uniforms } = createXRayMaterials();
+    const scan = new XRayScan(uniforms, 9.6, -0.2, { duration: 2, idleEvery: 0 });
+    scan.update(0.2, true);
+    const early = uniforms.uScan.value;
+    scan.update(0.8, true);
+    expect(uniforms.uScan.value).toBeLessThan(early);
+    expect(uniforms.uRevealAll.value).toBe(0);
+    scan.update(2, true);
+    expect(uniforms.uRevealAll.value).toBe(1);
+    expect(uniforms.uBandGain.value).toBe(0);
+  });
+  it("mouvement réduit : structure visible immédiatement, sans bande lumineuse", () => {
+    const { uniforms } = createXRayMaterials();
+    new XRayScan(uniforms, 9.6, -0.2).showStatic();
+    expect(uniforms.uRevealAll.value).toBe(1);
+    expect(uniforms.uBandGain.value).toBe(0);
   });
 });
