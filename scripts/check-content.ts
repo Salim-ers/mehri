@@ -4,6 +4,7 @@
  *   npm run check:content            → échoue (code 1) s'il en reste : bloque la mise en production
  *   npm run check:content -- --report → rapport sans échec (relecture)
  */
+import { loadEnvConfig } from "@next/env";
 import { equipment, equipmentPageValidation } from "../src/content/equipment";
 import { motifsValidation } from "../src/content/motifs";
 import { practice } from "../src/content/practice";
@@ -24,6 +25,8 @@ const reportOnly = process.argv.includes("--report");
 if (process.argv.includes("--if-production")) {
   const production = process.env.VERCEL_ENV === "production" || process.env.RELEASE_GATE === "1";
   if (!production) process.exit(0);
+  // mêmes fichiers et même priorité que `next build` (.env.production, l'environnement réel l'emportant)
+  loadEnvConfig(process.cwd(), false);
   const problems: string[] = [];
   if (!process.env.NEXT_PUBLIC_SITE_URL) problems.push("NEXT_PUBLIC_SITE_URL n'est pas défini (domaine définitif requis).");
   if (process.env.NEXT_PUBLIC_REVIEW_MODE !== "false") problems.push("NEXT_PUBLIC_REVIEW_MODE doit valoir \"false\" en production.");
