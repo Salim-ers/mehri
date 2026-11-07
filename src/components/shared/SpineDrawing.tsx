@@ -95,17 +95,3 @@ export function SpineDrawing({ className = "", draw = false, variant = "line", h
     </svg>
   );
 }
-
-/** Version horizontale stylisée pour la transition entre pages. */
-export function SpineLine({ className = "" }: { className?: string }) {
-  const count = 26;
-  return (
-    <svg viewBox={`0 0 ${count * 24} 24`} preserveAspectRatio="none" className={className} aria-hidden="true">
-      <line x1="0" y1="12" x2={count * 24} y2="12" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />
-      {Array.from({ length: count }, (_, i) => {
-        const h = 8 + Math.sin((i / count) * Math.PI) * 6;
-        return <rect key={i} x={i * 24 + 5} y={12 - h / 2} width={14} height={h} rx={3} fill="currentColor" opacity={0.25 + (i / count) * 0.75} />;
-      })}
-    </svg>
-  );
-}

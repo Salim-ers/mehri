@@ -96,11 +96,11 @@ export default function MentionsLegalesPage() {
                 {imageryCredits.map((c) => (
                   <li key={c.src}>
                     {c.subject} — {c.credit.author},{" "}
-                    <a href={c.credit.licenseUrl} target="_blank" rel="noopener noreferrer license" className="link-line">
+                    <a href={c.credit.licenseUrl} target="_blank" rel="noopener noreferrer license" className="link-more">
                       {c.credit.license}
                     </a>{" "}
                     (
-                    <a href={c.credit.sourceUrl} target="_blank" rel="noopener noreferrer" className="link-line">
+                    <a href={c.credit.sourceUrl} target="_blank" rel="noopener noreferrer" className="link-more">
                       source
                     </a>
                     )

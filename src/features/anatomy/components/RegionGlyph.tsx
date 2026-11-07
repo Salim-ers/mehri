@@ -5,7 +5,7 @@ const ZONES: Record<RegionId, { cx: number; cy: number; rx: number; ry: number }
   cervicales: { cx: 50, cy: 30, rx: 9, ry: 9 },
   epaules: { cx: 50, cy: 41, rx: 30, ry: 8 },
   thorax: { cx: 50, cy: 58, rx: 17, ry: 15 },
-  colonne: { cx: 50, cy: 72, rx: 6, ry: 36 },
+  lombaires: { cx: 50, cy: 86, rx: 8, ry: 13 },
   bassin: { cx: 50, cy: 103, rx: 16, ry: 9 },
   hanches: { cx: 50, cy: 112, rx: 22, ry: 8 },
   genoux: { cx: 50, cy: 160, rx: 18, ry: 10 },

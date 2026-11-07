@@ -37,6 +37,11 @@ export interface SpineMaterials {
   readonly disc: THREE.Material;
 }
 
+/** Région de l'atlas d'un étage vertébral : cervicales, thorax (T1–T12) ou lombaires (L1–L5). */
+export function spineRegion(region: SpineRegion): "cervicales" | "thorax" | "lombaires" {
+  return region === "cervical" ? "cervicales" : region === "thoracic" ? "thorax" : "lombaires";
+}
+
 export function createSpine(detail: Detail, materials: SpineMaterials): SpineModel {
   return runSync(spineBuilder(detail, materials));
 }
@@ -77,7 +82,7 @@ export function* spineBuilder(detail: Detail, materials: SpineMaterials): Builde
       geometries.push(dg);
       disc = new THREE.Mesh(dg, materials.disc);
       disc.name = `disc-${f.spec.label}`;
-      disc.userData = { region: f.spec.region === "cervical" ? "cervicales" : "colonne", label: `Disque ${f.spec.label}` };
+      disc.userData = { region: spineRegion(f.spec.region), label: `Disque ${f.spec.label}` };
       joint.add(disc);
     }
 
@@ -85,7 +90,7 @@ export function* spineBuilder(detail: Detail, materials: SpineMaterials): Builde
     geometries.push(vg);
     const mesh = new THREE.Mesh(vg, materials.bone);
     mesh.name = f.spec.label;
-    mesh.userData = { region: f.spec.region === "cervical" ? "cervicales" : "colonne", label: f.spec.label };
+    mesh.userData = { region: spineRegion(f.spec.region), label: f.spec.label };
     // centre du corps relatif au pivot
     const by = f.y - jy;
     const bz = f.z - jz;

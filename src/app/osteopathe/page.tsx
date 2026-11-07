@@ -9,7 +9,7 @@ import { plates, xrays } from "@/content/imagery";
 import { photos } from "@/content/media";
 import { identity, practice, reviewMode } from "@/content/practice";
 import { approach, approachValidation } from "@/content/practitioner";
-import { ImageCredit } from "@/features/imagery/ScrollCrossfade";
+import { ImageCredit } from "@/features/imagery/ImageCredit";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
@@ -26,7 +26,7 @@ export default function OsteopathePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "L'ostéopathe", path: "/osteopathe" }])) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Ostéopathe", path: "/osteopathe" }])) }}
       />
       <PageIntro
         eyebrow="L'ostéopathe"
@@ -40,7 +40,7 @@ export default function OsteopathePage() {
       />
 
       {/* Approche : composition anatomique, sans portrait */}
-      <section aria-labelledby="approche" className="px-[var(--gutter)] pb-24 md:pb-36">
+      <section aria-labelledby="approche" className="pb-24 md:pb-36">
         <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
           <Photo
             photo={photos.office}
@@ -69,7 +69,7 @@ export default function OsteopathePage() {
       </section>
 
       {/* Conduite de la consultation : quatre verbes, sans numérotation */}
-      <section aria-labelledby="principes" className="on-dark xray-stage grain overflow-hidden px-[var(--gutter)] py-24 text-bone md:py-36">
+      <section aria-labelledby="principes" className="on-dark mx-2 overflow-hidden rounded-panel bg-night py-24 sm:mx-3 md:py-36">
         <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
           <div className="lg:col-span-5">
             <Reveal>
@@ -80,9 +80,9 @@ export default function OsteopathePage() {
             </Reveal>
             <Reveal className="mt-12 hidden lg:block" delay={150}>
               <figure>
-                <div className="xray-frame relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[4px]">
-                  <Image src={xrays.cervical.src} alt={xrays.cervical.alt} fill sizes="30vw" className="xray-img object-cover" />
-                  <div className="scan-sweep" aria-hidden="true" />
+                <div className="xray-frame relative aspect-[4/5] w-full max-w-md">
+                  <Image src={xrays.cervical.src} alt={xrays.cervical.alt} fill sizes="30vw" className="object-cover" />
+                  <span className="scan-line" aria-hidden="true" />
                 </div>
                 <figcaption>
                   <ImageCredit image={xrays.cervical} tone="dark" />
@@ -92,10 +92,10 @@ export default function OsteopathePage() {
           </div>
           <ul className="lg:col-span-6 lg:col-start-7">
             {approach.principles.map((p, i) => (
-              <li key={p.title} className="border-t border-bone/12 py-9 first:border-t-0 first:pt-0 lg:py-12">
+              <li key={p.title} className="card-dark mb-3 rounded-panel p-8 lg:p-10">
                 <Reveal delay={i * 80}>
                   <h3 className="display text-[clamp(2.2rem,1.6rem+2.2vw,3.8rem)]">{p.title}</h3>
-                  <p className="mt-4 max-w-lg text-[1.05rem] leading-relaxed text-bone/80">{p.text}</p>
+                  <p className="mt-4 max-w-lg text-[1.05rem] leading-relaxed text-mist">{p.text}</p>
                 </Reveal>
               </li>
             ))}
@@ -104,7 +104,7 @@ export default function OsteopathePage() {
       </section>
 
       {/* Qualification : uniquement des informations confirmées par le praticien */}
-      <section aria-labelledby="qualification" className="px-[var(--gutter)] py-24 md:py-32">
+      <section aria-labelledby="qualification" className="py-24 md:py-32">
         <div className="wrap grid items-center gap-y-12 lg:grid-cols-12 lg:gap-x-8">
           <div className="space-y-8 lg:col-span-5">
           <Reveal>
@@ -137,19 +137,19 @@ export default function OsteopathePage() {
             ) : null}
             <p className="prose-body">
               Le détail d&apos;une consultation, de l&apos;échange aux conseils, est présenté pas à pas.{" "}
-              <Link href="/deroulement-consultation" className="link-line text-ink">
-                Le déroulement d&apos;une consultation
+              <Link href="/conseils#seance" transitionTypes={["to-reading"]} className="link-more text-ink">
+                Le déroulement d&apos;une séance <span className="btn-arrow" aria-hidden="true">→</span>
               </Link>
             </p>
           </div>
           </div>
           <Reveal className="lg:col-span-5 lg:col-start-8" delay={120}>
             <figure>
-              <div className="relative mx-auto aspect-[1708/2400] max-h-[86vh] overflow-hidden rounded-[4px] bg-mineral">
+              <div className="relative mx-auto aspect-[1708/2400] max-h-[86vh] overflow-hidden rounded-panel bg-sand">
                 <Image src={plates.engraving.src} alt={plates.engraving.alt} fill sizes="(min-width: 1024px) 36vw, 100vw" className="object-cover" />
               </div>
               <figcaption>
-                <ImageCredit image={plates.engraving} />
+                <ImageCredit image={plates.engraving} tone="light" />
               </figcaption>
             </figure>
           </Reveal>
@@ -157,8 +157,8 @@ export default function OsteopathePage() {
       </section>
 
       {/* Philosophie */}
-      <section aria-labelledby="philosophie" className="bg-paper px-[var(--gutter)] py-24 md:py-36">
-        <div className="mx-auto max-w-5xl text-center">
+      <section aria-labelledby="philosophie" className="wrap pb-24 md:pb-32">
+        <div className="panel-sand mx-auto px-6 py-20 text-center md:px-16 md:py-28">
           <Reveal>
             <h2 id="philosophie" className="eyebrow">
               Philosophie

@@ -1,13 +1,13 @@
 /**
- * Régions de l'atlas « Le corps en mouvement ».
+ * Régions de la page « Anatomie » (sélection, mouvements, motifs associés).
  * Contenu pédagogique général — ni diagnostic, ni promesse de traitement.
  */
 export const REGION_IDS = [
-  "colonne",
   "cervicales",
-  "epaules",
   "thorax",
+  "lombaires",
   "bassin",
+  "epaules",
   "hanches",
   "genoux",
 ] as const;
@@ -18,9 +18,7 @@ export type MotionDemo = "spine-wave" | "neck-rotation" | "shoulder-abduction" |
 
 export interface AnatomyRegion {
   readonly id: RegionId;
-  readonly plate: string;
   readonly label: string;
-  readonly latin: string;
   readonly summary: string;
   readonly body: readonly string[];
   readonly keyFacts: readonly { readonly label: string; readonly value: string }[];
@@ -32,33 +30,8 @@ export interface AnatomyRegion {
 
 export const anatomyRegions: readonly AnatomyRegion[] = [
   {
-    id: "colonne",
-    plate: "I",
-    label: "Colonne vertébrale",
-    latin: "Columna vertebralis",
-    summary:
-      "Axe central du corps, la colonne associe solidité et mobilité grâce à une succession de vertèbres et de disques intervertébraux.",
-    body: [
-      "La colonne vertébrale compte habituellement 7 vertèbres cervicales, 12 thoraciques et 5 lombaires, prolongées par le sacrum et le coccyx. Ses trois courbures — lordose cervicale, cyphose thoracique et lordose lombaire — répartissent les contraintes liées à la posture et au mouvement.",
-      "Chaque segment ne bouge que de quelques degrés : c'est l'addition de ces petits mouvements qui permet de se pencher, de se redresser ou de se tourner.",
-    ],
-    keyFacts: [
-      { label: "Vertèbres mobiles", value: "24" },
-      { label: "Courbures", value: "3" },
-      { label: "Disques", value: "23" },
-    ],
-    movement: {
-      demo: "spine-wave",
-      caption: "Flexion et extension : chaque vertèbre participe pour une petite part au mouvement global.",
-    },
-    motifSlug: "dos-et-lombalgies",
-    camera: { position: [4.4, 7.4, -6.2], target: [0, 6.5, -0.1] },
-  },
-  {
     id: "cervicales",
-    plate: "II",
     label: "Cervicales et nuque",
-    latin: "Vertebrae cervicales",
     summary:
       "Sept vertèbres légères portent la tête et autorisent une grande amplitude de rotation, d'inclinaison et de flexion.",
     body: [
@@ -77,39 +50,16 @@ export const anatomyRegions: readonly AnatomyRegion[] = [
     camera: { position: [2.8, 8.9, -3.2], target: [0, 8.3, 0] },
   },
   {
-    id: "epaules",
-    plate: "III",
-    label: "Épaules et membres supérieurs",
-    latin: "Cingulum membri superioris",
-    summary:
-      "L'épaule est un complexe articulaire : la clavicule, l'omoplate et l'humérus travaillent ensemble pour orienter le bras.",
-    body: [
-      "La tête de l'humérus s'articule avec une surface peu profonde de l'omoplate, la glène. Cette configuration offre une très grande mobilité, au prix d'une stabilité qui repose largement sur les muscles et les tissus environnants.",
-      "Lorsque le bras s'élève sur le côté, l'omoplate pivote elle aussi sur le thorax : on parle de rythme scapulo-huméral.",
-    ],
-    keyFacts: [
-      { label: "Os principaux", value: "3" },
-      { label: "Rythme scapulo-huméral", value: "≈ 2 : 1" },
-    ],
-    movement: {
-      demo: "shoulder-abduction",
-      caption: "Élévation latérale du bras : l'humérus et l'omoplate se coordonnent.",
-    },
-    motifSlug: "inconfort-des-epaules",
-    camera: { position: [3.4, 8.0, 4.6], target: [0.6, 7.3, 0] },
-  },
-  {
     id: "thorax",
-    plate: "IV",
     label: "Thorax et côtes",
-    latin: "Cavea thoracis",
     summary:
-      "Douze paires de côtes, le sternum et les vertèbres thoraciques forment une cage à la fois protectrice et mobile.",
+      "Douze vertèbres thoraciques, douze paires de côtes et le sternum forment une cage à la fois protectrice et mobile.",
     body: [
       "Les sept premières paires de côtes rejoignent directement le sternum, les trois suivantes s'y relient par un cartilage commun et les deux dernières restent libres en avant.",
       "À chaque respiration, les côtes s'élèvent et s'écartent légèrement : le volume du thorax varie sans cesse, au rythme de la ventilation.",
     ],
     keyFacts: [
+      { label: "Vertèbres", value: "T1 → T12" },
       { label: "Paires de côtes", value: "12" },
       { label: "Côtes flottantes", value: "2 paires" },
     ],
@@ -121,10 +71,29 @@ export const anatomyRegions: readonly AnatomyRegion[] = [
     camera: { position: [3.0, 7.6, 5.4], target: [0, 7.0, 0.3] },
   },
   {
+    id: "lombaires",
+    label: "Colonne lombaire",
+    summary:
+      "Cinq vertèbres massives, de L1 à L5, portent le poids du tronc entre le thorax et le bassin.",
+    body: [
+      "Les vertèbres lombaires sont les plus volumineuses de la colonne : elles supportent une grande partie du poids du corps. Ensemble, elles dessinent une courbure à concavité postérieure, la lordose lombaire.",
+      "L'orientation de leurs articulations favorise la flexion et l'extension — se pencher en avant, se redresser — et limite la rotation. Entre deux vertèbres, un disque intervertébral participe à la répartition des contraintes.",
+    ],
+    keyFacts: [
+      { label: "Vertèbres", value: "L1 → L5" },
+      { label: "Courbure", value: "Lordose" },
+      { label: "Disques lombaires", value: "5" },
+    ],
+    movement: {
+      demo: "spine-wave",
+      caption: "Flexion et extension : chaque vertèbre participe pour une petite part au mouvement global de la colonne.",
+    },
+    motifSlug: "dos-et-lombalgies",
+    camera: { position: [3.6, 6.3, -5.6], target: [0, 5.75, -0.1] },
+  },
+  {
     id: "bassin",
-    plate: "V",
     label: "Bassin",
-    latin: "Pelvis",
     summary:
       "Le bassin relie la colonne aux membres inférieurs. Il transmet le poids du tronc vers les hanches.",
     body: [
@@ -143,10 +112,28 @@ export const anatomyRegions: readonly AnatomyRegion[] = [
     camera: { position: [2.6, 5.9, 4.8], target: [0, 4.9, 0] },
   },
   {
+    id: "epaules",
+    label: "Épaules",
+    summary:
+      "L'épaule est un complexe articulaire : la clavicule, l'omoplate et l'humérus travaillent ensemble pour orienter le bras.",
+    body: [
+      "La tête de l'humérus s'articule avec une surface peu profonde de l'omoplate, la glène. Cette configuration offre une très grande mobilité, au prix d'une stabilité qui repose largement sur les muscles et les tissus environnants.",
+      "Lorsque le bras s'élève sur le côté, l'omoplate pivote elle aussi sur le thorax : on parle de rythme scapulo-huméral.",
+    ],
+    keyFacts: [
+      { label: "Os principaux", value: "3" },
+      { label: "Rythme scapulo-huméral", value: "≈ 2 : 1" },
+    ],
+    movement: {
+      demo: "shoulder-abduction",
+      caption: "Élévation latérale du bras : l'humérus et l'omoplate se coordonnent.",
+    },
+    motifSlug: "inconfort-des-epaules",
+    camera: { position: [3.4, 8.0, 4.6], target: [0.6, 7.3, 0] },
+  },
+  {
     id: "hanches",
-    plate: "VI",
     label: "Hanches",
-    latin: "Articulatio coxae",
     summary:
       "Articulation profonde et stable, la hanche emboîte la tête du fémur dans la cavité acétabulaire du bassin.",
     body: [
@@ -166,9 +153,7 @@ export const anatomyRegions: readonly AnatomyRegion[] = [
   },
   {
     id: "genoux",
-    plate: "VII",
-    label: "Genoux et membres inférieurs",
-    latin: "Articulatio genus",
+    label: "Genoux",
     summary:
       "Le genou associe le fémur, le tibia et la rotule. Il porte le poids du corps tout en autorisant une large flexion.",
     body: [

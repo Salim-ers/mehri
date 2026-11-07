@@ -80,7 +80,7 @@ export default function ContactPage() {
             {hasValue(practice.email) ? (
               <Reveal>
                 <h2 className="eyebrow">E-mail</h2>
-                <a href={`mailto:${practice.email.value}`} className="link-line mt-3 inline-block text-lg">
+                <a href={`mailto:${practice.email.value}`} className="link-more mt-3 text-lg">
                   {practice.email.value}
                 </a>
               </Reveal>

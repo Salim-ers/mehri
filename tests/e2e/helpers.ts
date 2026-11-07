@@ -1,13 +1,16 @@
 import type { Page } from "@playwright/test";
 
-/** Considère l'écran d'ouverture comme déjà vu (sauf tests dédiés). */
+/** Masque l'ouverture cinématographique (sauf tests dédiés) : elle se ferme seule, mais ralentirait chaque test. */
 export async function skipIntro(page: Page) {
   await page.addInitScript(() => {
-    try {
-      sessionStorage.setItem("mm-intro-seen", "1");
-    } catch {
-      /* stockage indisponible */
-    }
+    const add = () => {
+      const style = document.createElement("style");
+      style.textContent = ".intro{display:none!important}";
+      (document.head ?? document.documentElement)?.appendChild(style);
+    };
+    // le script peut s'exécuter avant la création de <html>
+    if (document.documentElement) add();
+    else document.addEventListener("readystatechange", add, { once: true });
   });
 }
 
@@ -23,12 +26,12 @@ export function collectErrors(page: Page): string[] {
 export const PAGES = [
   "/",
   "/osteopathe",
-  "/le-corps-en-mouvement",
+  "/anatomie",
   "/motifs-de-consultation",
   "/motifs-de-consultation/dos-et-lombalgies",
   "/cabinet",
   "/equipements",
-  "/deroulement-consultation",
+  "/conseils",
   "/rendez-vous",
   "/contact",
   "/mentions-legales",

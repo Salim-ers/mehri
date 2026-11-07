@@ -11,8 +11,9 @@ export function SiteFooter() {
   const phone = hasValue(practice.phone) ? practice.phone.value : null;
   const hours = hasValue(practice.openingHours) ? practice.openingHours.value : [];
   return (
-    <footer className="on-dark grain relative overflow-hidden bg-anthracite text-bone">
-      <div className="wrap px-[var(--gutter)] pb-10 pt-20 md:pt-28">
+    <footer className="px-2 pb-2 sm:px-3 sm:pb-3">
+      <div className="on-dark relative overflow-hidden rounded-panel bg-graphite text-bone">
+      <div className="wrap pb-10 pt-20 md:pt-28">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <div>
             <p className="display max-w-2xl text-[clamp(2.4rem,1.5rem+3.4vw,5rem)]">
@@ -36,7 +37,7 @@ export function SiteFooter() {
                   <br />
                   {address.postalCode} {address.locality}
                 </address>
-                <Link href="/contact" className="link-line mt-3 inline-block text-sm text-bone/80 hover:text-bone">
+                <Link href="/contact" className="link-more mt-3 inline-block text-sm text-bone/80 hover:text-bone">
                   Plan et accès
                 </Link>
               </div>
@@ -84,11 +85,11 @@ export function SiteFooter() {
             <strong className="font-semibold text-bone">L&apos;ostéopathie ne se substitue pas à un avis médical.</strong> L&apos;ostéopathe
             intervient dans le cadre des troubles fonctionnels et oriente vers un médecin lorsque les symptômes le nécessitent. En cas
             d&apos;urgence, appelez le{" "}
-            <a className="link-line text-bone" href="tel:15">
+            <a className="link-more text-bone" href="tel:15">
               15
             </a>{" "}
             ou le{" "}
-            <a className="link-line text-bone" href="tel:112">
+            <a className="link-more text-bone" href="tel:112">
               112
             </a>
             .
@@ -114,6 +115,7 @@ export function SiteFooter() {
             <li>Site conçu par QuadCore</li>
           </ul>
         </div>
+      </div>
       </div>
     </footer>
   );

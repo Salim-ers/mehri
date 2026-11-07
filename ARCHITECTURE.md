@@ -8,35 +8,39 @@
 
 ```text
 src/
-├── app/                       # Routes (une page = une planche)
-│   ├── layout.tsx             # Polices, JSON-LD cabinet, en-tête, panneau de rendez-vous, barre mobile
-│   ├── page.tsx               # Accueil
+├── app/
+│   ├── layout.tsx             # Polices, JSON-LD cabinet, en-tête flottant, panneau de rendez-vous, barre mobile
+│   ├── template.tsx           # Transitions de page (<ViewTransition>, types « to-anatomy », « to-cabinet », « to-reading »)
+│   ├── page.tsx               # Accueil (ouverture cinématographique + chapitres 3D au défilement)
+│   ├── anatomie/              # Explorateur 3D / radiographie (remplace /le-corps-en-mouvement, redirigée)
+│   ├── conseils/              # Préparer son rendez-vous, séance, après, FAQ (remplace /deroulement-consultation, redirigée)
 │   ├── motifs-de-consultation/[slug]/page.tsx   # 8 fiches prérendues (generateStaticParams)
 │   ├── sitemap.ts · robots.ts · manifest.ts · not-found.tsx · error.tsx
-│   └── globals.css            # Tokens (@theme), couches base / components
+│   └── globals.css            # Tokens (@theme), couches base / components, transitions de page
 ├── proxy.ts                   # 404 réelle pour une fiche inconnue (au lieu d'une « soft 404 »)
 ├── content/                   # SOURCE UNIQUE DE VÉRITÉ (typée)
-│   ├── practice.ts            # Coordonnées, horaires, tarifs… sous forme de « Fact »
-│   ├── anatomy.ts · motifs.ts (+ 4 catégories) · equipment.ts · site.ts · practitioner.ts
+│   ├── practice.ts            # Coordonnées, horaires, tarifs, durée… sous forme de « Fact »
+│   ├── anatomy.ts             # 7 régions : cervicales, thorax, lombaires, bassin, épaules, hanches, genoux
+│   ├── motifs.ts (+ 4 familles reliées à une région) · equipment.ts · practitioner.ts
+│   ├── site.ts                # Navigation (6 entrées + RDV), redirections des anciennes adresses, étapes de séance
+│   ├── advice.ts              # Page Conseils : préparation, après la séance, FAQ (réponses générales + faits validés)
 │   ├── media.ts               # Photos du cabinet SANS personne (showsPerson: false, testé)
-│   ├── imagery.ts             # Radiographies, pièce osseuse, gravure : licences libres, crédits
-├── lib/
-│   ├── facts.ts               # Fact<T> : confirmed | to-confirm | missing + collectPending()
-│   ├── contact-links.ts       # tel:, itinéraires, règle métier de réservation
-│   ├── seo.ts                 # Métadonnées, Schema.org, sérialisation JSON-LD sûre
-│   └── contrast.ts            # Calcul WCAG (testé)
+│   └── imagery.ts             # Radiographies, pièce osseuse, gravure : licences libres, crédits, cliché par région
+├── lib/                       # facts.ts · contact-links.ts · seo.ts · contrast.ts
 ├── components/
-│   ├── layout/                # SiteHeader (menu <dialog>), BookingDialog, Footer, MobileActionBar
+│   ├── layout/                # SiteHeader (capsule + menu plein écran), Intro, BookingDialog, Footer, MobileActionBar
 │   └── shared/                # PageIntro, Photo, Reveal, BookingButton, Pending, RedFlags, SpineDrawing, OpenOnHash
 ├── features/
 │   ├── anatomy/
-│   │   ├── model/             # Logique 3D pure (sans React) : profil rachidien, géométries, squelette, animations, scheduler
-│   │   └── components/        # HeroStage/HeroSpineScene, XRayStage/XRayScene, AtlasExplorer/AtlasScene, RegionFinder, RegionViewer, BodyMap
-│   ├── imagery/               # Fondu enchaîné de radiographies au défilement, légendes de crédit
-│   ├── cabinet/               # Galerie empilée + plein écran, liste du matériel
-│   ├── consultation/          # Chronologie
+│   │   ├── model/             # Logique 3D pure, testée en Node : squelette, matériaux, rendus (looks), caméra (orbit), mise en scène (director)
+│   │   ├── engine/            # Moteur unique : runtime (three.js), world.worker (OffscreenCanvas), host (fil principal), protocol
+│   │   └── components/        # AnatomyStage (emplacement), AnatomyExplorer, MotifStage, RegionStage, RegionGlyph
+│   ├── home/                  # HomeHero : scène collante + chapitres au défilement
+│   ├── imagery/               # ImageCredit (légende obligatoire des images sous licence)
+│   ├── cabinet/               # Visite photographique + plein écran, matériel (liste, vitrine)
+│   ├── consultation/          # Illustrations au trait de la page Conseils
 │   └── contact/               # Plan Google Maps sur consentement
-├── hooks/use-environment.ts   # mouvement réduit, WebGL (dont rendu logiciel), niveau d'appareil, visibilité
+├── hooks/use-environment.ts   # mouvement réduit (useSyncExternalStore), visibilité
 └── styles/tokens.ts           # Palette (testée contre globals.css)
 ```
 
@@ -71,28 +75,37 @@ Modèle proposé : `services(id, label, duration_min, active)`, `opening_rules(w
 
 ## 3D
 
-- **Modèles procéduraux originaux** (`features/anatomy/model/`) : vertèbres construites à partir d'un profil anatomique moyen (`spine-profile.ts` : 7 C, 12 T, 5 L, dimensions en mm, courbures sagittales) — corps réniforme à taille concave, arc postérieur et foramen, processus épineux/transverses/articulaires, atlas et axis spécifiques (dent), disques, sacrum percé de 4 paires de foramens, coccyx. Squelette complet : côtes et cartilages, sternum, ceinture scapulaire, membres, bassin (aile iliaque galbée), crâne.
-- **Pas de ressource tierce** → aucune contrainte de licence. Limite assumée : représentation pédagogique stylisée, pas un scan médical. Évolution possible : modèles scannés sous licence (ex. BodyParts3D, CC BY-SA) convertis en GLB Draco.
-- **Une seule source de vérité** : le même profil génère la 3D et les dessins SVG (intro, transitions, version sans WebGL).
-- **Performance** : construction découpée en tranches de 8 ms (`scheduler.ts`, générateurs + `scheduler.yield`) → aucune tâche longue ; matériaux partagés ; niveau de détail `low` sur mobile/appareils modestes ; DPR plafonné ; `frameloop="never"` hors écran ; chargement après l'évènement `load` + inactivité ; libération des géométries et matériaux au démontage.
-- **Repli** : pas de WebGL, ou **rendu logiciel** (SwiftShader, llvmpipe…) → illustrations vectorielles, même contenu.
-- **Rendu radiographique** (`materials.ts` › `createXRayMaterials`, `XRayScan`) : shader additif dont la densité dépend de l'angle de vue ; une bande lumineuse balaie la structure de haut en bas puis revient à intervalle régulier ; mouvement réduit : structure visible d'emblée. Utilisé à l'accueil (`xray-controller.ts`), dans « Pourquoi consulter ? » (sélection des zones) et sur les fiches motifs.
-- **Accueil** (`hero-controller.ts`) : entrée de la colonne dans une lumière qui monte, va-et-vient lent autour d'une vue de trois quarts profil, réaction au pointeur ; composition propre à chaque format (`heroLayout` : ultralarge, ordinateur, tablette, portrait), testée.
-- **Chargement** : chaque scène se monte après `load` + inactivité (`useIdleAfterLoad`), ses shaders sont compilés en parallèle (`renderer.compileAsync`) avant le premier rendu ; carte d'environnement réservée aux appareils puissants.
-- **Animations articulaires** (`motion.ts`) : rotations autour de pivots anatomiques (axe local ou axe monde de repos), amplitudes physiologiques, fondu entre démonstrations, bouton pause sur l'atlas, les fiches motifs et l'accueil (WCAG 2.2.2), désactivées par défaut en mouvement réduit. Animations CSS décoratives limitées à quelques cycles.
-- **Tactile** : sur écran tactile, un doigt fait défiler la page, deux doigts font pivoter le squelette (pas de piège de défilement).
+### Un moteur unique, hors du fil principal
+
+- **Un seul squelette pour tout le site** (`engine/`) : construit une fois par visite, puis rattaché tour à tour aux emplacements de page (`<AnatomyStage>`). Le canvas est déplacé d'une page à l'autre (aucun contexte WebGL recréé, aucune reconstruction) ; il porte le nom de transition `anatomy-world`, si bien que le squelette « voyage » d'une page à l'autre pendant les transitions.
+- **Web Worker + OffscreenCanvas** (`world.worker.ts`) : three.js, la construction du squelette, la compilation des shaders et le rendu ne touchent jamais le fil principal (aucune tâche longue liée à la 3D, défilement et interactions fluides). **Repli automatique** sur le fil principal (même `runtime.ts`, chargé à la demande) si le navigateur ne le permet pas.
+- **Rendu à la demande** : boucle `requestAnimationFrame` du moteur arrêtée hors écran (IntersectionObserver), onglet masqué, ou quand rien ne bouge ; cadence divisée par deux sur appareil modeste lorsque seule la « présence » (va-et-vient lent) est active. Budget de pixels (3,6 Mpx / 1,3 Mpx) : un écran 4K ne fait pas exploser le coût GPU.
+- **Plus de React Three Fiber ni de drei** : les scènes sont pilotées par messages (`protocol.ts`) ; ombre de contact = texture calculée (aucun rendu supplémentaire), environnement = PMREM unique sur appareils puissants.
+- **Repli** : pas de WebGL, `?no-webgl`, ou **rendu logiciel** (SwiftShader, llvmpipe… détecté dans le moteur) → illustrations vectorielles, même contenu.
+
+### Rendus et mise en scène
+
+- **Modèles procéduraux originaux** (`model/`) : vertèbres construites à partir d'un profil anatomique moyen (`spine-profile.ts` : 7 C, 12 T, 5 L, dimensions en mm, courbures sagittales), squelette complet. Pas de ressource tierce. Représentation pédagogique stylisée, jamais présentée comme un examen.
+- **Deux familles de matériaux** (`materials.ts`) : matière osseuse (patch de shader : matérialisation de haut en bas avec liseré bronze, découpe par la ligne radiographique ; la colonne est légèrement plus lumineuse) et radiographie (densité additive selon l'angle de vue).
+- **Bascule os ↔ radiographie** (`looks.ts`) : chaque os a un jumeau radiographique qui partage sa géométrie ; une ligne horizontale balaie le squelette (os en dessous, radiographie au-dessus). Masquage par calques de rendu (jamais `visible = false`, qui masquerait les os rattachés).
+- **Mise en évidence / isolement** : la région choisie passe en bronze, les autres s'atténuent ou deviennent une silhouette radiographique fantôme.
+- **Caméra** (`orbit.ts`, `director.ts`) : poses (cible, angles, distance, décentrage d'objectif) amorties indépendamment de la cadence ; cadrages propres à chaque format (portrait, tablette, ordinateur, ultralarge) et à chaque mode (accueil, explorateur, motifs, fiche), testés.
+- **Accueil** : ouverture (colonne d'abord, puis squelette, lumière qui tourne, caméra qui recule), puis chapitres au défilement : nuque (rotation), épaule (élévation), bassin (bascule), puis balayage radiographique.
+- **Explorateur** : rotation au glisser (doigt horizontal, souris), zoom borné (boutons, pincement, Ctrl + molette — la molette seule fait toujours défiler la page), clic sur un os = sélection de sa région, isolement, mouvement propre à chaque région.
+- **Animations articulaires** (`motion.ts`) : rotations autour de pivots anatomiques, amplitudes physiologiques, fondu entre démonstrations ; bouton pause partout (WCAG 2.2.2) ; en mouvement réduit, aucune animation automatique (lecture à la demande).
 
 ## Motion design
 
-- Pas d'écran d'ouverture : la page d'accueil est utilisable immédiatement ; l'effet d'entrée est porté par la colonne 3D elle-même.
-- Transition de page : `<ViewTransition>` (React 19.3), simple fondu.
-- Défilement : fondu enchaîné de radiographies (`ScrollCrossfade`), galerie du cabinet en scènes empilées et parallaxe (CSS `animation-timeline: view()`, amélioration progressive).
-- Révélations : `IntersectionObserver` ; contenu présent dans le HTML et visible sans JS.
-- `prefers-reduced-motion` respecté partout (CSS + 3D).
+- **Ouverture** (`Intro.tsx`, accueil uniquement, à l'arrivée sur le site) : fond graphite, monogramme au reflet bronze, ligne lumineuse qui dessine la colonne, vertèbres qui apparaissent, puis la scène se resserre et révèle l'accueil. Rendu serveur, disparition 100 % CSS (≈ 2,7 s, même sans JavaScript), sautée au premier geste, jamais rejouée par la navigation interne, absente en mouvement réduit. Le titre de l'accueil est peint dès le premier affichage (LCP) ; seule sa position s'anime.
+- **Transitions de page** (`template.tsx` + `transitionTypes` des liens) : vers l'anatomie, la lumière baisse et un masque arrondi dévoile la scène sombre ; vers le cabinet, la fenêtre photographique de l'accueil s'agrandit et devient la page ; des Motifs vers les Conseils, le panneau de lecture s'ouvre et devient la page ; sinon, fondu et légère montée. L'en-tête reste fixe ; le bouton « Précédent », les liens directs et le chargement n'en dépendent jamais (amélioration progressive).
+- **En-tête** : capsule flottante qui se resserre au défilement (animation CSS pilotée par le défilement, sans JavaScript) ; menu plein écran avec vignette (photo ou cliché) et accès direct au rendez-vous.
+- **Défilement** : fenêtres photographiques qui s'ouvrent (clip-path arrondi), parallaxe, ligne de temps de la séance qui se remplit (`animation-timeline: view()`, amélioration progressive).
+- **Micro-interactions** : reflet lumineux des boutons capsule, flèches qui avancent, accordéons animés (`::details-content`, `interpolate-size`).
+- Animations sur `transform`, `opacity`, `clip-path` ; aucun `backdrop-filter` ; `prefers-reduced-motion` respecté partout (CSS, transitions de page, 3D).
 
 ## SEO
 
-Métadonnées uniques par page, canonical, Open Graph (image 1200×630), sitemap (19 URL), robots (indexation uniquement sur `VERCEL_ENV=production` ou `ALLOW_INDEXING=true`), JSON-LD `MedicalBusiness` + `Person` + `BreadcrumbList` + `MedicalWebPage`. Les horaires ne sont publiés dans Schema.org qu'une fois confirmés ; adresse et téléphone (candidats concordants sur deux sources) le sont, la production restant bloquée tant qu'ils ne sont pas confirmés. Aucune note ni aucun avis n'est publié. Image Open Graph par défaut sur toutes les pages ; `noindex` sur les préproductions. Tout le contenu de l'atlas existe en HTML (section « Les sept régions, en texte »).
+Métadonnées uniques par page, canonical, Open Graph (image 1200×630), sitemap (19 URL ; anciennes adresses redirigées en 308), robots (indexation uniquement sur `VERCEL_ENV=production` ou `ALLOW_INDEXING=true`), JSON-LD `MedicalBusiness` + `Person` + `BreadcrumbList` + `MedicalWebPage` + `FAQPage` (Conseils). Les horaires ne sont publiés dans Schema.org qu'une fois confirmés ; adresse et téléphone (candidats concordants sur deux sources) le sont, la production restant bloquée tant qu'ils ne sont pas confirmés. Aucune note ni aucun avis n'est publié. Image Open Graph par défaut sur toutes les pages ; `noindex` sur les préproductions. Tout le contenu de l'anatomie existe en HTML (section « Les régions en détail »).
 
 ## Sécurité
 

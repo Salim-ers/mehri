@@ -58,3 +58,12 @@ Passer chaque entrée en `confirmed(...)` dans `src/content/`, relancer `npm run
 - **Aucune photographie de personne** n'est plus publiée : portrait, praticien au bureau, consultations et appareils tenus en main sont retirés du site (fichiers sources conservés dans `assets/source/`). Restent les trois vues des lieux vides : salle, tables, bureau.
 - Les appareils de percussion et à embout circulaire sont décrits sans image : leurs seules photos montrent une personne.
 - **Visuels anatomiques sous licence libre** (Wikimedia Commons, licences vérifiées le 06/11/2026) : radiographies du rachis lombaire et cervical, du bassin, du genou et de l'épaule, une vertèbre de collection et une gravure de 1798. Chaque image est légendée « sans lien avec un patient du cabinet » ; auteur, licence et source figurent dans les mentions légales. Détail : `assets/imagery-source/credits.json`.
+
+## Refonte « Human Motion Studio » du 7 novembre 2026
+
+Nouvelle page **Conseils** (préparer sa consultation, séance, après la séance, FAQ). Deux questions facultatives ont été ajoutées ; tant qu'elles restent sans réponse, la FAQ renvoie vers la prise de rendez-vous par téléphone (rien n'est inventé, la mise en production n'est pas bloquée) :
+
+- **Durée habituelle d'une consultation** (`practice.consultationDuration`).
+- **Consigne d'annulation** (délai de prévenance éventuel, `practice.cancellationPolicy`).
+
+À relire par le praticien : les réponses générales de la FAQ (ordonnance, documents, différence avec la kinésithérapie, remboursement, consultation pour un enfant) et les quatre conseils de préparation (`src/content/advice.ts`). Aucune photographie de personne n'a été réintroduite (règle 4 de CLAUDE.md).

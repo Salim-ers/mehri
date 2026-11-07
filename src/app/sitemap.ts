@@ -3,7 +3,7 @@ import { motifs } from "@/content/motifs";
 import { siteUrl } from "@/content/practice";
 import { navigation, secondaryPages } from "@/content/site";
 
-const LAST_MODIFIED = new Date("2026-11-06");
+const LAST_MODIFIED = new Date("2026-11-07");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = [...navigation, ...secondaryPages].map((n) => ({

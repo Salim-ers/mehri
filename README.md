@@ -54,14 +54,16 @@ Tests end-to-end sans navigateurs Playwright téléchargés : `PLAYWRIGHT_CHROME
 
 | URL | Contenu |
 |---|---|
-| `/` | Accueil — colonne 3D dans la lumière, nom, rendez-vous, adresse ; squelette radiographique ; motifs en radiographies ; cabinet |
-| `/osteopathe` | L'ostéopathe — approche, principes, qualification confirmée (aucun portrait) |
-| `/motifs-de-consultation` + 8 fiches | Pourquoi consulter ? — sélection des zones (3D radiographique), 4 familles dépliables |
-| `/le-corps-en-mouvement` | Corps en mouvement — explorateur 3D (7 régions, `?region=genoux`), mouvements articulaires |
-| `/cabinet` | Le cabinet — galerie empilée (lieux vides), matériel, accès |
-| `/rendez-vous` | Prendre rendez-vous — téléphone, horaires, adresse (aussi en panneau sur toutes les pages) |
-| `/equipements`, `/deroulement-consultation`, `/contact` | Pages complémentaires (pied de page, menu) |
+| `/` | Accueil — ouverture cinématographique, squelette 3D et chapitres au défilement (nuque, épaule, bassin, radiographie), motifs en radiographies, cabinet, rendez-vous |
+| `/osteopathe` | Ostéopathe — approche, principes, qualification confirmée (aucun portrait) |
+| `/motifs-de-consultation` + 8 fiches | Motifs — modèle 3D qui suit la lecture, familles en panneaux, fiche avec région animée et rendez-vous |
+| `/anatomie` | Anatomie — « Sous la surface, le mouvement » : 3D / radiographie, 7 régions, isolement, mouvements (`?region=genoux`) |
+| `/cabinet` | Cabinet — visite photographique (lieux vides), plein écran, matériel, accès |
+| `/conseils` | Conseils — avant, pendant, après la séance, FAQ |
+| `/rendez-vous` | Prendre rendez-vous — informations + vrai parcours d'appel (aussi en panneau sur toutes les pages) |
+| `/equipements`, `/contact` | Pages complémentaires (menu, pied de page) |
 | `/mentions-legales`, `/confidentialite` | Pages légales (dont crédits des images sous licence) |
+| `/le-corps-en-mouvement`, `/deroulement-consultation` | Anciennes adresses → redirections permanentes vers `/anatomie` et `/conseils` |
 
 ## Paramètres utiles
 

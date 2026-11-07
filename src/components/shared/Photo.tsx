@@ -10,34 +10,26 @@ interface PhotoProps {
   readonly priority?: boolean;
   /** légende discrète sous l'image */
   readonly caption?: boolean | string;
+  /** ouverture en fenêtre arrondie à l'entrée dans l'écran */
   readonly reveal?: boolean;
   readonly delay?: number;
   readonly focus?: readonly [number, number];
   readonly zoom?: number;
-  readonly aspect?: string;
-  /** léger mouvement de parallaxe au défilement (CSS, désactivé en mouvement réduit) */
+  /** léger mouvement de profondeur au défilement (CSS, désactivé en mouvement réduit) */
   readonly parallax?: boolean;
-  readonly rounded?: boolean;
+  readonly radius?: "panel" | "card" | "soft" | "none";
 }
 
-/** Photographie d'architecture ou de matériel : cadrage par point focal, ouverture douce. */
-export function Photo({
-  photo,
-  sizes,
-  className = "",
-  priority = false,
-  caption = false,
-  reveal = true,
-  delay = 0,
-  focus,
-  zoom = 1,
-  aspect,
-  parallax = false,
-  rounded = true,
-}: PhotoProps) {
+const RADIUS = { panel: "rounded-panel", card: "rounded-card", soft: "rounded-soft", none: "" } as const;
+
+/**
+ * Photographie du cabinet (lieux vides, matériel) dans une fenêtre arrondie :
+ * cadrage par point focal, jamais déformée (object-fit: cover).
+ */
+export function Photo({ photo, sizes, className = "", priority = false, caption = false, reveal = true, delay = 0, focus, zoom = 1, parallax = false, radius = "panel" }: PhotoProps) {
   const [fx, fy] = focus ?? photo.focus;
   const img = (
-    <div className={`relative h-full w-full overflow-hidden bg-mineral ${rounded ? "rounded-[3px]" : ""}`} style={aspect ? { aspectRatio: aspect } : undefined}>
+    <div className={`relative h-full w-full overflow-hidden bg-sand ${RADIUS[radius]}`}>
       <Image
         src={photo.src}
         alt={photo.alt}

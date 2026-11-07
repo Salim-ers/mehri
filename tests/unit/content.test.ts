@@ -9,14 +9,32 @@ import { galleryScenes } from "@/content/media";
 import { getMotif, motifCategories, motifs } from "@/content/motifs";
 import { practice } from "@/content/practice";
 import { approach } from "@/content/practitioner";
-import { consultationSteps, navigation, redFlags, secondaryPages } from "@/content/site";
+import { afterItems, beforePanels, faqItems } from "@/content/advice";
+import { consultationSteps, legacyRedirects, navigation, redFlags, secondaryPages } from "@/content/site";
 import { practiceJsonLd, serializeJsonLd } from "@/lib/seo";
 
 const root = join(__dirname, "../..");
 
 describe("intégrité du contenu", () => {
   it("la navigation principale compte six entrées, dans l'ordre demandé", () => {
-    expect(navigation.map((n) => n.label)).toEqual(["Accueil", "L'ostéopathe", "Pourquoi consulter ?", "Corps en mouvement", "Le cabinet", "Prendre rendez-vous"]);
+    expect(navigation.map((n) => n.label)).toEqual(["Accueil", "Ostéopathe", "Motifs", "Anatomie", "Cabinet", "Conseils"]);
+  });
+  it("la prise de rendez-vous reste accessible hors de la navigation principale (page dédiée)", () => {
+    expect(secondaryPages.map((p) => p.href)).toContain("/rendez-vous");
+  });
+  it("les anciennes adresses redirigent vers des pages existantes", () => {
+    for (const r of legacyRedirects) {
+      expect(existsSync(join(root, `src/app${r.source}/page.tsx`)), r.source).toBe(false);
+      expect(existsSync(join(root, `src/app${r.destination}/page.tsx`)), r.destination).toBe(true);
+    }
+  });
+  it("aucune numérotation décorative dans les contenus (motifs, principes)", () => {
+    for (const m of motifs) expect(Object.keys(m)).not.toContain("number");
+    for (const p of approach.principles) expect(Object.keys(p)).not.toContain("number");
+    for (const r of anatomyRegions) expect(Object.keys(r)).not.toContain("plate");
+  });
+  it("chaque famille de motifs désigne une région du modèle 3D", () => {
+    for (const c of motifCategories) expect(REGION_IDS, c.id).toContain(c.region);
   });
   it("chaque entrée de navigation correspond à une vraie page", () => {
     for (const item of [...navigation, ...secondaryPages]) {
@@ -80,7 +98,7 @@ describe("intégrité du contenu", () => {
  * médical usurpé, aucun public non confirmé (nourrissons, grossesse).
  */
 describe("conformité éditoriale", () => {
-  const corpus = JSON.stringify({ motifs, motifCategories, anatomyRegions, equipment, approach, consultationSteps, redFlags, photos, galleryScenes, xrays });
+  const corpus = JSON.stringify({ motifs, motifCategories, anatomyRegions, equipment, approach, consultationSteps, redFlags, photos, galleryScenes, xrays, beforePanels, afterItems, faq: faqItems() });
   const forbidden = [
     /guéri(r|son|t)/i,
     /garanti/i,
@@ -98,6 +116,26 @@ describe("conformité éditoriale", () => {
       expect(corpus).not.toMatch(re);
     });
   }
+});
+
+describe("page Conseils", () => {
+  it("la FAQ couvre les huit questions demandées", () => {
+    expect(faqItems().map((f) => f.id)).toEqual(["ordonnance", "duree", "tarif", "documents", "annulation", "enfant", "kine", "remboursement"]);
+  });
+  it("rappelle le cadre des manipulations cervicales (décret n° 2007-435)", () => {
+    const docs = faqItems().find((f) => f.id === "documents");
+    expect(docs?.answer.join(" ")).toMatch(/rachis cervical[^.]*diagnostic médical[^.]*2007-435/);
+  });
+  it("n'annonce jamais de réaction « normale » après la séance ni d'examen obligatoire", () => {
+    const text = JSON.stringify({ beforePanels, afterItems, faq: faqItems() });
+    expect(text).not.toMatch(/fatigue[^.]*normal|douleur[^.]*normal|normal[^.]*(fatigue|douleur)/i);
+    expect(text).not.toMatch(/radiographie (est )?(obligatoire|nécessaire|indispensable)/i);
+  });
+  it("sans donnée validée, durée et tarifs renvoient vers la prise de rendez-vous (rien d'inventé)", () => {
+    const byId = Object.fromEntries(faqItems().map((f) => [f.id, f.answer.join(" ")]));
+    if (practice.consultationDuration.value === null) expect(byId.duree).toMatch(/prise de rendez-vous/);
+    if (practice.fees.value === null) expect(byId.tarif).toMatch(/communiqués lors de la prise de rendez-vous/);
+  });
 });
 
 describe("données structurées", () => {

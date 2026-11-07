@@ -8,7 +8,6 @@ import { confirmed, type Fact } from "@/lib/facts";
  */
 export interface Motif {
   readonly slug: string;
-  readonly number: string;
   readonly title: string;
   readonly shortTitle: string;
   readonly region: RegionId;
@@ -28,10 +27,9 @@ export const motifsValidation: Fact<boolean> = confirmed(true);
 export const motifs: readonly Motif[] = [
   {
     slug: "dos-et-lombalgies",
-    number: "01",
     title: "Inconfort du dos et lombalgies",
     shortTitle: "Dos & lombaires",
-    region: "colonne",
+    region: "lombaires",
     metaDescription:
       "Inconfort du bas du dos et lombalgies communes : comment se déroule une consultation d'ostéopathie à Creil, et quand consulter d'abord un médecin.",
     lede: "Le bas du dos supporte une grande partie du poids du tronc. Raideur au réveil, gêne après une longue station assise ou après un effort inhabituel : ces inconforts sont fréquents.",
@@ -57,7 +55,6 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "tensions-cervicales",
-    number: "02",
     title: "Tensions cervicales",
     shortTitle: "Nuque & cervicales",
     region: "cervicales",
@@ -86,7 +83,6 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "inconfort-des-epaules",
-    number: "03",
     title: "Inconfort des épaules",
     shortTitle: "Épaules",
     region: "epaules",
@@ -114,7 +110,6 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "mobilite-articulaire",
-    number: "04",
     title: "Mobilité articulaire",
     shortTitle: "Mobilité",
     region: "hanches",
@@ -142,7 +137,6 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "tensions-musculaires",
-    number: "05",
     title: "Douleurs et tensions musculaires",
     shortTitle: "Tensions musculaires",
     region: "thorax",
@@ -171,7 +165,6 @@ export const motifs: readonly Motif[] = [
   {
     slug: "consultation-de-sportifs",
     dependsOnPublics: true,
-    number: "06",
     title: "Consultation de sportifs",
     shortTitle: "Sportifs",
     region: "genoux",
@@ -200,7 +193,6 @@ export const motifs: readonly Motif[] = [
   {
     slug: "accompagnement-selon-l-age",
     dependsOnPublics: true,
-    number: "07",
     title: "Accompagnement adapté à différents âges",
     shortTitle: "Selon l'âge",
     region: "bassin",
@@ -228,10 +220,9 @@ export const motifs: readonly Motif[] = [
   },
   {
     slug: "osteopathie-structurelle",
-    number: "08",
     title: "Ostéopathie structurelle",
     shortTitle: "Approche structurelle",
-    region: "colonne",
+    region: "lombaires",
     metaDescription:
       "Ostéopathie structurelle à Creil : principes de l'approche, déroulement et cadre réglementaire de la pratique.",
     lede: "L'ostéopathie structurelle s'intéresse en priorité aux articulations et à leur mobilité, à l'aide de techniques manuelles précises.",
@@ -266,6 +257,8 @@ export interface MotifCategory {
   readonly title: string;
   readonly intro: string;
   readonly slugs: readonly string[];
+  /** région mise en évidence sur le modèle 3D lorsque la famille est consultée */
+  readonly region: RegionId;
 }
 
 export const motifCategories: readonly MotifCategory[] = [
@@ -274,24 +267,28 @@ export const motifCategories: readonly MotifCategory[] = [
     title: "Le dos et la nuque",
     intro: "Raideurs, gêne du bas du dos ou de la nuque, sensation de dos « bloqué » sans traumatisme.",
     slugs: ["dos-et-lombalgies", "tensions-cervicales", "osteopathie-structurelle"],
+    region: "lombaires",
   },
   {
     id: "articulations",
     title: "Les articulations",
     intro: "Épaules, hanches, genoux : lorsqu'un mouvement du quotidien devient moins fluide.",
     slugs: ["inconfort-des-epaules", "mobilite-articulaire"],
+    region: "epaules",
   },
   {
     id: "activite",
     title: "Muscles et activité physique",
     intro: "Tensions musculaires, pratique sportive régulière ou reprise d'une activité.",
     slugs: ["tensions-musculaires", "consultation-de-sportifs"],
+    region: "genoux",
   },
   {
     id: "ages",
     title: "À chaque étape de la vie",
     intro: "Une consultation adaptée à l'âge, aux antécédents et au rythme de vie de chacun.",
     slugs: ["accompagnement-selon-l-age"],
+    region: "bassin",
   },
 ];
 

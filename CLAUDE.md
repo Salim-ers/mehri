@@ -14,13 +14,14 @@ Lire aussi `AGENTS.md` (Next.js 16 : consulter `node_modules/next/dist/docs/` av
 ## Conventions
 
 - TypeScript strict + `noUncheckedIndexedAccess`. Pas de `any`, pas de désactivation ESLint.
-- Logique 3D impérative dans `features/anatomy/model/` (classes / fonctions pures, testables en Node) ; les composants R3F se contentent d'appeler `update()` dans `useFrame` (règles React Compiler).
-- Construction de géométrie : générateurs + `runAsync` (jamais de tâche > 50 ms). Libérer géométries et matériaux au démontage.
+- 3D : un moteur unique (`features/anatomy/engine/`, Web Worker + OffscreenCanvas, repli fil principal). Logique pure et testée dans `features/anatomy/model/` ; les pages n'utilisent que `<AnatomyStage config={…}>` (jamais de second canvas WebGL). Pas de React Three Fiber.
+- Construction de géométrie : générateurs + `runAsync`. Masquer un os par calque (`setShown`), jamais `visible = false`.
 - Styles : tokens dans `src/styles/tokens.ts` **et** `@theme` de `globals.css` (un test vérifie la cohérence). Classes maison dans `@layer components` pour que les utilitaires Tailwind gardent la priorité.
-- Toute animation : non bloquante, contenu présent dans le HTML, variante `prefers-reduced-motion`.
+- Toute animation : non bloquante, contenu présent dans le HTML, variante `prefers-reduced-motion`. Le texte LCP n'est jamais masqué (opacité) au premier affichage.
+- Transitions de page : `template.tsx` + `transitionTypes` sur les liens (`to-anatomy`, `to-cabinet`, `to-reading`) ; éléments partagés par `<ViewTransition name share="morph" default="none">`.
 - Textes en français, typographie française (espaces insécables avant « : ; ? ! » quand pertinent, guillemets « »).
-- Nouvelles pages : `pageMetadata()` + JSON-LD Breadcrumb, entrée dans `navigation` (6 entrées principales, ordre figé par un test) ou `secondaryPages` (le sitemap et les tests e2e s'appuient dessus).
-- Direction artistique : ivoire, tons minéraux, anthracite ; pas de police mono, de quadrillage, de numéros de section ni de mentions « Planche / Fig. » (un test vérifie la feuille de style).
+- Nouvelles pages : `pageMetadata()` + JSON-LD Breadcrumb, entrée dans `navigation` (6 entrées : Accueil, Ostéopathe, Motifs, Anatomie, Cabinet, Conseils — ordre figé par un test) ou `secondaryPages` (le sitemap et les tests e2e s'appuient dessus). Ancienne adresse supprimée → `legacyRedirects` (308).
+- Direction artistique « Human Motion Studio » : ivoire, blanc doux, noyer, bronze, graphite ; bleu radiographie / bleu nuit réservés aux séquences anatomiques. Formes arrondies (`rounded-panel` 32 px, `rounded-card` 24 px, `rounded-soft` 16 px, capsules). Pas de police mono, de quadrillage, de numéros de section ni de mentions « Planche / Fig. » (tests).
 - Boutons de rendez-vous : `<BookingButton />` (lien `/rendez-vous` + `data-booking` qui ouvre le panneau `BookingDialog`).
 
 ## Commandes

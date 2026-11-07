@@ -8,8 +8,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { getRegion } from "@/content/anatomy";
 import { getMotif, motifs, motifsValidation } from "@/content/motifs";
 import { practice, siteUrl } from "@/content/practice";
-import { RegionGlyph } from "@/features/anatomy/components/RegionGlyph";
-import { RegionViewer } from "@/features/anatomy/components/RegionViewer";
+import { RegionStage } from "@/features/anatomy/components/RegionStage";
 import { hasValue } from "@/lib/facts";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
@@ -42,7 +41,7 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
           __html: serializeJsonLd([
             breadcrumbJsonLd([
               { name: "Accueil", path: "/" },
-              { name: "Pourquoi consulter ?", path: "/motifs-de-consultation" },
+              { name: "Motifs de consultation", path: "/motifs-de-consultation" },
               { name: motif.title, path },
             ]),
             {
@@ -57,13 +56,13 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
           ]),
         }}
       />
-      <header className="px-[var(--gutter)] pt-[calc(var(--header-h)+3rem)] md:pt-[calc(var(--header-h)+5.5rem)]">
+      <header className="pt-[calc(var(--header-h)+3rem)] md:pt-[calc(var(--header-h)+5rem)]">
         <div className="wrap">
           <nav aria-label="Fil d'Ariane" className="text-sm text-ink-soft">
             <ol className="flex flex-wrap gap-2">
               <li>
                 <Link href="/motifs-de-consultation" className="hover:text-ink">
-                  Pourquoi consulter ?
+                  Motifs de consultation
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
@@ -84,24 +83,23 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
                 Région : {region.label} <PendingBadge fact={motifsValidation} />
                 {motif.dependsOnPublics ? <PendingBadge fact={practice.publics} className="ml-2" /> : null}
               </p>
+              <BookingButton className="mt-6" />
             </div>
           </div>
         </div>
       </header>
 
-      <div className="px-[var(--gutter)] py-16 md:py-24">
+      <div className="py-16 md:py-24">
         <div className="wrap grid gap-y-14 lg:grid-cols-12 lg:gap-x-8">
           {/* Illustration 3D (rendu radiographique) */}
-          <div className="lg:col-span-5">
+          <div className="min-w-0 lg:col-span-5">
             <div className="lg:sticky lg:top-[calc(var(--header-h)+2rem)]">
               <figure>
-                <div className="xray-stage relative h-[58svh] max-h-[680px] overflow-hidden rounded-[4px] text-xray/50">
-                  <RegionViewer region={motif.region} fallback={<RegionGlyph region={motif.region} className="h-4/5 w-auto text-xray/60" />} />
-                </div>
-                <figcaption className="mt-3 text-[0.85rem] text-ink-soft">{region.movement.caption}</figcaption>
+                <RegionStage region={motif.region} />
+                <figcaption className="mt-3 px-1 text-[0.85rem] text-ink-soft">{region.movement.caption}</figcaption>
               </figure>
-              <Link href={`/le-corps-en-mouvement?region=${region.id}#atlas`} className="link-more mt-5 text-ink">
-                Explorer cette région en 3D
+              <Link href={`/anatomie?region=${region.id}`} transitionTypes={["to-anatomy"]} className="link-more mt-5 text-ink">
+                Explorer cette région en 3D <span className="btn-arrow" aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
@@ -122,9 +120,9 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
               <h2 id="situations" className="display text-[clamp(1.9rem,1.5rem+1.4vw,2.8rem)]">
                 Ce qui amène à consulter
               </h2>
-              <ul className="mt-6 border-t border-ink/10">
+              <ul className="mt-6 grid gap-2">
                 {motif.situations.map((s) => (
-                  <li key={s} className="border-b border-ink/10 py-4 text-[1.05rem]">
+                  <li key={s} className="rounded-soft bg-paper px-5 py-4 text-[1.03rem] shadow-soft">
                     {s}
                   </li>
                 ))}
@@ -153,8 +151,8 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
                 </div>
               ) : null}
               <p className="mt-6">
-                <Link href="/deroulement-consultation" className="link-line text-ink">
-                  Le déroulement d&apos;une consultation en détail
+                <Link href="/conseils" transitionTypes={["to-reading"]} className="link-more text-ink">
+                  Préparer votre consultation <span className="btn-arrow" aria-hidden="true">→</span>
                 </Link>
               </p>
             </Reveal>
@@ -163,23 +161,29 @@ export default async function MotifPage({ params }: PageProps<"/motifs-de-consul
               <RedFlags extra={motif.caution} />
             </Reveal>
 
-            <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
-              <BookingButton size="lg" />
-              <Link href="/motifs-de-consultation" className="link-more text-ink">
-                Tous les motifs
-              </Link>
+            <div className="panel-graphite on-dark flex flex-col items-start gap-6 p-6 sm:p-8 md:p-10">
+              <p className="display text-[clamp(1.9rem,1.4rem+1.6vw,2.8rem)]">
+                Prendre <em>rendez-vous</em>
+              </p>
+              <p className="text-mist">Le cabinet vous répond par téléphone et vous propose un créneau.</p>
+              <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
+                <BookingButton variant="light" size="lg" />
+                <Link href="/motifs-de-consultation" className="link-more text-bone">
+                  Tous les motifs
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <nav aria-label="Fiches voisines" className="border-t border-ink/10 px-[var(--gutter)]">
-        <div className="wrap grid grid-cols-2">
-          <Link href={`/motifs-de-consultation/${prev.slug}`} className="group border-r border-ink/10 py-10 pr-6">
+      <nav aria-label="Fiches voisines" className="wrap pb-20">
+        <div className="grid grid-cols-2 gap-3">
+          <Link href={`/motifs-de-consultation/${prev.slug}`} className="group rounded-panel bg-sand p-6 md:p-9">
             <span className="text-sm text-ink-soft">← Précédent</span>
             <span className="display mt-2 block text-xl transition-colors group-hover:text-bronze-ink md:text-3xl">{prev.title}</span>
           </Link>
-          <Link href={`/motifs-de-consultation/${next.slug}`} className="group py-10 pl-6 text-right">
+          <Link href={`/motifs-de-consultation/${next.slug}`} className="group rounded-panel bg-sand p-6 text-right md:p-9">
             <span className="text-sm text-ink-soft">Suivant →</span>
             <span className="display mt-2 block text-xl transition-colors group-hover:text-bronze-ink md:text-3xl">{next.title}</span>
           </Link>

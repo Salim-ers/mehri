@@ -1,18 +1,53 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowIcon, CloseIcon } from "@/components/shared/Icons";
-import type { GalleryScene } from "@/content/media";
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from "react";
+import { ArrowIcon, CloseIcon, PlusIcon } from "@/components/shared/Icons";
+import { Reveal } from "@/components/shared/Reveal";
+import type { GalleryScene, Photo } from "@/content/media";
+
+interface Detail {
+  readonly photo: Photo;
+  readonly focus: readonly [number, number];
+  readonly zoom: number;
+  readonly label: string;
+}
+
+export interface TourScene extends GalleryScene {
+  /** recadrage de détail dans une photographie réelle (jamais d'image générée) */
+  readonly detail?: Detail;
+}
+
+/** Fenêtre photographique : bouton plein écran, cadrage par point focal, aucune déformation. */
+function Window({ photo, focus, zoom = 1, sizes, className, onOpen, label, grow = false }: { photo: Photo; focus?: readonly [number, number]; zoom?: number; sizes: string; className: string; onOpen: (el: HTMLButtonElement) => void; label: string; grow?: boolean }) {
+  const [fx, fy] = focus ?? photo.focus;
+  return (
+    <button type="button" onClick={(e) => onOpen(e.currentTarget)} className={`group relative block overflow-hidden rounded-panel bg-sand text-left ${grow ? "tour-grow" : ""} ${className}`}>
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        fill
+        sizes={sizes}
+        quality={80}
+        className="object-cover transition-transform duration-[1.6s] ease-[var(--ease-expo)] group-hover:scale-[1.03]"
+        style={{ objectPosition: `${fx}% ${fy}%`, scale: zoom !== 1 ? String(zoom) : undefined, transformOrigin: `${fx}% ${fy}%` }}
+      />
+      <span className="glass absolute bottom-4 right-4 flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold opacity-90 transition-opacity group-hover:opacity-100">
+        <PlusIcon /> {label}
+      </span>
+    </button>
+  );
+}
 
 /**
- * Galerie du cabinet : grandes photographies d'architecture qui s'empilent au
- * défilement (chaque scène recouvre doucement la précédente), plein écran au clic.
- * Effet purement CSS (scroll-driven animations), désactivé en mouvement réduit.
+ * Visite photographique du cabinet : chaque espace a sa propre composition
+ * (grande fenêtre qui s'ouvre au défilement, détail en décalé, profondeur),
+ * plein écran au clic avec navigation clavier, boutons et glisser.
  */
-export function CabinetGallery({ scenes }: { scenes: readonly GalleryScene[] }) {
+export function CabinetGallery({ scenes }: { scenes: readonly TourScene[] }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState<"next" | "prev">("next");
   const touch = useRef<number | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
 
@@ -21,7 +56,13 @@ export function CabinetGallery({ scenes }: { scenes: readonly GalleryScene[] }) 
     setIndex(i);
     dialog.current?.showModal();
   };
-  const go = useCallback((delta: number) => setIndex((i) => (i + delta + scenes.length) % scenes.length), [scenes.length]);
+  const go = useCallback(
+    (delta: number) => {
+      setDir(delta > 0 ? "next" : "prev");
+      setIndex((i) => (i + delta + scenes.length) % scenes.length);
+    },
+    [scenes.length],
+  );
 
   useEffect(() => {
     const d = dialog.current;
@@ -40,50 +81,58 @@ export function CabinetGallery({ scenes }: { scenes: readonly GalleryScene[] }) 
     };
   }, [go]);
 
-  const current = scenes[index]!;
+  const current = scenes[index];
+  const onTouchStart = (e: TouchEvent) => {
+    touch.current = e.touches[0]?.clientX ?? null;
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    const start = touch.current;
+    const end = e.changedTouches[0]?.clientX;
+    touch.current = null;
+    if (start === null || end === undefined || Math.abs(end - start) < 40) return;
+    go(end < start ? 1 : -1);
+  };
 
   return (
     <>
-      <div>
+      <div className="space-y-28 md:space-y-40">
         {scenes.map((scene, i) => {
           const flip = i % 2 === 1;
           return (
-            <section
-              key={scene.id}
-              aria-labelledby={`espace-${scene.id}`}
-              className="sticky top-0 flex min-h-[100svh] items-center bg-ivory px-[var(--gutter)] pb-10 pt-[calc(var(--header-h)+1.5rem)] shadow-[0_-40px_80px_-50px_rgba(27,29,31,0.35)] first:shadow-none"
-            >
-              <div className="stack-scene__media wrap grid items-center gap-y-8 lg:grid-cols-12 lg:gap-x-8">
-                <div className={`flex justify-center lg:col-span-6 ${flip ? "lg:col-start-1" : "lg:col-start-7 lg:row-start-1"}`}>
-                  <button
-                    type="button"
-                    onClick={(e) => open(i, e.currentTarget)}
-                    className="group relative h-[62svh] max-h-[860px] cursor-zoom-in overflow-hidden rounded-[3px] bg-mineral lg:h-[80svh]"
-                    style={{ aspectRatio: `${scene.photo.width} / ${scene.photo.height}` }}
-                    aria-label={`Agrandir la photographie : ${scene.title}`}
-                  >
-                    <Image
-                      src={scene.photo.src}
-                      alt={scene.photo.alt}
-                      fill
-                      sizes="(min-width: 1024px) 30vw, 60vw"
-                      quality={80}
-                      priority={i === 0}
-                      className="object-cover transition-transform duration-[1.6s] ease-[var(--ease-soft)] group-hover:scale-[1.03]"
-                      style={{ objectPosition: `${scene.photo.focus[0]}% ${scene.photo.focus[1]}%` }}
-                    />
-                  </button>
-                </div>
-                <div className={`lg:col-span-4 ${flip ? "lg:col-start-8" : "lg:col-start-2"} lg:row-start-1`}>
-                  <h2 id={`espace-${scene.id}`} className="display text-[clamp(2.1rem,1.4rem+2.6vw,4.2rem)]">
-                    {scene.title}
-                  </h2>
-                  <p className="prose-body mt-5 max-w-md">{scene.text}</p>
-                  <p className="mt-6 text-sm text-ink-soft">
-                    {i + 1} / {scenes.length}
-                  </p>
-                </div>
+            <section key={scene.id} aria-labelledby={`espace-${scene.id}`} className="wrap grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
+              <div className={`relative lg:col-span-7 ${flip ? "lg:order-2 lg:col-start-6" : ""}`}>
+                <Window
+                  photo={scene.photo}
+                  sizes="(min-width: 1024px) 40vw, 92vw"
+                  className={`mx-auto aspect-[4/5] w-full max-w-[36rem] ${flip ? "lg:ml-auto lg:mr-0" : "lg:ml-0"}`}
+                  onOpen={(el) => open(i, el)}
+                  label="Plein écran"
+                  grow
+                />
+                {scene.detail ? (
+                  <div className={`parallax-soft absolute -bottom-10 w-[42%] max-w-[15rem] ${flip ? "-left-2 lg:left-0" : "-right-2 lg:right-4"}`}>
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-card border-4 border-ivory shadow-lift">
+                      <Image
+                        src={scene.detail.photo.src}
+                        alt={`Détail : ${scene.detail.label}`}
+                        fill
+                        sizes="15rem"
+                        quality={80}
+                        className="object-cover"
+                        style={{ objectPosition: `${scene.detail.focus[0]}% ${scene.detail.focus[1]}%`, scale: String(scene.detail.zoom), transformOrigin: `${scene.detail.focus[0]}% ${scene.detail.focus[1]}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
               </div>
+              <Reveal className={`lg:col-span-4 ${flip ? "lg:order-1 lg:col-start-1" : "lg:col-start-9"}`}>
+                <p className="eyebrow">Visite du cabinet</p>
+                <h2 id={`espace-${scene.id}`} className="display mt-5 text-[clamp(2.2rem,1.5rem+2.6vw,4rem)]">
+                  {scene.title}
+                </h2>
+                <p className="prose-body mt-5">{scene.text}</p>
+                {scene.detail ? <p className="mt-4 text-sm text-ink-soft">Détail : {scene.detail.label}.</p> : null}
+              </Reveal>
             </section>
           );
         })}
@@ -91,40 +140,38 @@ export function CabinetGallery({ scenes }: { scenes: readonly GalleryScene[] }) 
 
       <dialog
         ref={dialog}
-        aria-label="Galerie plein écran"
-        className="lightbox on-dark m-0 h-[100dvh] max-h-none w-screen max-w-none bg-anthracite p-0 text-bone backdrop:bg-anthracite/90"
-        onTouchStart={(e) => {
-          touch.current = e.touches[0]?.clientX ?? null;
+        aria-label="Photographies du cabinet en plein écran"
+        className="lightbox"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) dialog.current?.close();
         }}
-        onTouchEnd={(e) => {
-          const start = touch.current;
-          const end = e.changedTouches[0]?.clientX;
-          if (start !== null && end !== undefined && Math.abs(end - start) > 50) go(end < start ? 1 : -1);
-          touch.current = null;
-        }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-[var(--gutter)] py-4">
-            <p className="text-sm text-bone/80" aria-live="polite">
-              {current.title} — {index + 1} / {scenes.length}
-            </p>
-            <button type="button" onClick={() => dialog.current?.close()} className="flex min-h-11 items-center gap-2 rounded-full border border-bone/25 px-4 text-sm hover:border-bone">
-              <CloseIcon /> Fermer
-            </button>
+        {current ? (
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between gap-4 px-[var(--gutter)] py-4">
+              <p className="text-sm text-mist" aria-live="polite">
+                {index + 1} / {scenes.length} — {current.title}
+              </p>
+              <button type="button" onClick={() => dialog.current?.close()} className="flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold hover:bg-bone/10">
+                <CloseIcon /> Fermer
+              </button>
+            </div>
+            <div className="lightbox-frame relative flex-1" data-dir={dir} key={`${index}-${dir}`}>
+              <Image src={current.photo.src} alt={current.photo.alt} fill sizes="100vw" quality={85} className="object-contain" />
+            </div>
+            <div className="flex items-center justify-center gap-3 px-[var(--gutter)] py-5">
+              <button type="button" onClick={() => go(-1)} aria-label="Photographie précédente" className="icon-btn bg-bone/10 hover:bg-bone/20">
+                <ArrowIcon className="h-4 w-4 rotate-180" />
+              </button>
+              <p className="max-w-xl px-2 text-center text-sm text-mist">{current.photo.caption}</p>
+              <button type="button" onClick={() => go(1)} aria-label="Photographie suivante" className="icon-btn bg-bone/10 hover:bg-bone/20">
+                <ArrowIcon className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-          <div className="relative min-h-0 flex-1">
-            <Image key={current.id} src={current.photo.src} alt={current.photo.alt} fill sizes="100vw" quality={90} className="lightbox-img object-contain" />
-          </div>
-          <div className="flex items-center justify-between gap-4 px-[var(--gutter)] py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-            <button type="button" onClick={() => go(-1)} className="flex min-h-12 min-w-12 items-center justify-center rounded-full border border-bone/25 hover:border-bone" aria-label="Photographie précédente">
-              <ArrowIcon className="h-4 w-4 rotate-180" />
-            </button>
-            <p className="max-w-2xl text-center text-sm text-bone/75">{current.photo.caption}</p>
-            <button type="button" onClick={() => go(1)} className="flex min-h-12 min-w-12 items-center justify-center rounded-full border border-bone/25 hover:border-bone" aria-label="Photographie suivante">
-              <ArrowIcon className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        ) : null}
       </dialog>
     </>
   );

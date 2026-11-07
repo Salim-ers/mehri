@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { ViewTransition } from "react";
 import { BookingDialog, type BookingInfo } from "@/components/layout/BookingDialog";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -40,14 +39,18 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F3F0EA",
+  themeColor: "#F6F2EC",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
-/** Exécuté avant le premier rendu : active les animations progressives (le contenu reste visible sans JavaScript). */
-const bootScript = `document.documentElement.classList.add('js');`;
+/**
+ * Exécuté avant le premier rendu : active les animations progressives (le contenu reste visible
+ * sans JavaScript) et note la page d'arrivée (l'ouverture cinématographique n'est jouée qu'en
+ * arrivant sur l'accueil).
+ */
+const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');d.dataset.entry=location.pathname;if(location.pathname==='/'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('intro-on')})();`;
 
 function bookingInfo(): BookingInfo {
   const phone = hasValue(practice.phone) ? practice.phone.value : null;
@@ -81,12 +84,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           phoneDisplay={phone?.display ?? null}
           phoneHref={phone ? telHref(phone.e164) : null}
           addressLine={address ? formatAddress(address) : null}
+          hours={hasValue(practice.openingHours) ? practice.openingHours.value : []}
         />
-        <ViewTransition default="site-page">
-          <main id="contenu" tabIndex={-1} className="outline-none">
-            {children}
-          </main>
-        </ViewTransition>
+        <main id="contenu" tabIndex={-1} className="outline-none">
+          {children}
+        </main>
         <SiteFooter />
         <MobileActionBar phoneHref={phone ? telHref(phone.e164) : null} directionsHref={address ? directionLinks(address).google : null} />
         <BookingDialog info={bookingInfo()} />

@@ -21,7 +21,7 @@ export default function NotFound() {
           </div>
         </div>
         <div className="hidden justify-center md:col-span-4 md:col-start-9 md:flex">
-          <SpineDrawing variant="solid" className="h-[62vh] w-auto rotate-[8deg] text-mineral-deep" />
+          <SpineDrawing variant="solid" className="h-[62vh] w-auto rotate-[8deg] text-clay" />
         </div>
       </div>
     </section>

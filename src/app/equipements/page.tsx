@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Lines, PageIntro } from "@/components/shared/PageIntro";
 import { PendingBadge } from "@/components/shared/Pending";
 import { equipment, equipmentPageValidation } from "@/content/equipment";
-import { EquipmentList } from "@/features/cabinet/EquipmentList";
+import { EquipmentShowcase } from "@/features/cabinet/EquipmentList";
 import { breadcrumbJsonLd, pageMetadata, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -18,11 +18,11 @@ export default function EquipementsPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Le cabinet", path: "/cabinet" }, { name: "Le matériel", path: "/equipements" }])),
+          __html: serializeJsonLd(breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Cabinet", path: "/cabinet" }, { name: "Le matériel", path: "/equipements" }])),
         }}
       />
       <PageIntro
-        eyebrow="Le cabinet · Matériel"
+        eyebrow="Le matériel du cabinet"
         title={<Lines lines={["Le matériel", <>du <em>cabinet.</em></>]} />}
         lede={
           <>
@@ -32,18 +32,16 @@ export default function EquipementsPage() {
             </p>
             <p className="mt-4">
               Au cœur de la consultation reste l&apos;approche manuelle du praticien :{" "}
-              <Link href="/deroulement-consultation" className="link-line text-ink">
-                le déroulement d&apos;une consultation
+              <Link href="/conseils#seance" className="link-more text-ink">
+                le déroulement d&apos;une séance
               </Link>
               .
             </p>
           </>
         }
       />
-      <div className="px-[var(--gutter)] pb-28 md:pb-40">
-        <div className="wrap">
-          <EquipmentList items={equipment} detailed />
-        </div>
+      <div className="wrap pb-28 md:pb-40">
+        <EquipmentShowcase items={equipment} />
       </div>
     </>
   );

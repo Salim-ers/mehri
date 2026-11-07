@@ -1,3 +1,5 @@
+import type { RegionId } from "@/content/anatomy";
+
 /**
  * Imagerie anatomique d'illustration (radiographies, pièce osseuse, gravure).
  * - Ressources de Wikimedia Commons sous licence autorisant l'usage commercial
@@ -151,3 +153,17 @@ export const categoryVisuals: Readonly<Record<string, Imagery>> = {
 
 /** Toutes les ressources publiées (crédits des mentions légales). */
 export const imageryCredits: readonly Imagery[] = [...Object.values(xrays), ...Object.values(plates)];
+
+/**
+ * Cliché pédagogique associé à chaque région de la page « Anatomie »
+ * (mode radiographie). Le thorax n'a pas de radiographie : la pièce osseuse le remplace.
+ */
+export const regionImagery: Readonly<Record<RegionId, Imagery>> = {
+  cervicales: xrays.cervical,
+  thorax: plates.vertebra,
+  lombaires: xrays.lumbar,
+  bassin: xrays.pelvis,
+  epaules: xrays.shoulder,
+  hanches: xrays.pelvis,
+  genoux: xrays.knee,
+};

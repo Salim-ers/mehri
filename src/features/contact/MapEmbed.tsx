@@ -9,7 +9,7 @@ import { useState } from "react";
 export function MapEmbed({ src, title, address }: { src: string; title: string; address: string }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[4px] bg-mineral sm:aspect-[16/11]">
+    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-panel bg-sand sm:aspect-[16/11]">
       {loaded ? (
         <iframe
           src={src}

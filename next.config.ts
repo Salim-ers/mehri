@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { legacyRedirects } from "./src/content/site";
 
 /**
  * Content-Security-Policy.
@@ -53,6 +54,10 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  // anciennes adresses : redirections permanentes (paramètres conservés, ex. ?region=genoux)
+  async redirects() {
+    return legacyRedirects.map((r) => ({ ...r, permanent: true }));
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

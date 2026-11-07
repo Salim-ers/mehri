@@ -1,4 +1,4 @@
-import { confirmed, notPublished, type Fact } from "@/lib/facts";
+import { confirmed, missing, notPublished, type Fact } from "@/lib/facts";
 
 /**
  * SOURCE UNIQUE DE VÉRITÉ des informations du cabinet.
@@ -25,6 +25,10 @@ export interface Practice {
   readonly email: Fact<string>;
   readonly openingHours: Fact<readonly OpeningSlot[]>;
   readonly fees: Fact<readonly { readonly label: string; readonly price: string }[]>;
+  /** durée habituelle d'une consultation (FAQ de la page Conseils) */
+  readonly consultationDuration: Fact<string>;
+  /** consigne d'annulation (délai de prévenance) */
+  readonly cancellationPolicy: Fact<string>;
   readonly onlineBookingUrl: Fact<string>;
   readonly directoryListingUrl: Fact<string>;
   readonly accessibility: Fact<string>;
@@ -65,6 +69,10 @@ export const practice: Practice = {
   // Tarifs non publiés : le site indique qu'ils sont communiqués lors de la prise de rendez-vous.
   fees: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
   // Pas de plateforme : la prise de rendez-vous se fait par téléphone (resolveBookingAction).
+  // Questions ajoutées avec la page « Conseils » (07/11/2026) : facultatives, rien n'est inventé
+  // en attendant — la FAQ renvoie alors vers la prise de rendez-vous par téléphone.
+  consultationDuration: missing("Durée habituelle d'une consultation (par exemple « environ 45 minutes ») ?", { optional: true }),
+  cancellationPolicy: missing("Consigne pour annuler ou déplacer un rendez-vous (délai de prévenance éventuel) ?", { optional: true }),
   onlineBookingUrl: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher » (rendez-vous par téléphone).`),
   directoryListingUrl: notPublished(`${VALIDATION_SOURCE} : « Ne pas afficher ».`),
   accessibility: confirmed("Accès, stationnement et sanitaires adaptés aux personnes à mobilité réduite"),

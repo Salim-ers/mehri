@@ -57,12 +57,12 @@ export function BookingDialog({ info }: { info: BookingInfo }) {
         // clic sur le voile : fermeture
         if (e.target === e.currentTarget) close();
       }}
-      className="booking-sheet m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-3xl bg-paper p-0 text-ink shadow-2xl md:my-auto md:ml-auto md:mr-[var(--gutter)] md:max-h-[calc(100dvh-2rem)] md:w-[29rem] md:rounded-3xl"
+      className="booking-sheet text-ink"
     >
-      <div className="px-7 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-6 md:p-9">
+      <div className="booking-sheet__card h-full max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain rounded-panel bg-paper px-7 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-6 shadow-lift md:p-9">
         <div className="flex items-start justify-between gap-4">
           <p className="eyebrow pt-3">Rendez-vous</p>
-          <button type="button" onClick={close} aria-label="Fermer" className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/12 hover:border-ink/40">
+          <button type="button" onClick={close} aria-label="Fermer" className="icon-btn bg-sand hover:bg-clay">
             <CloseIcon />
           </button>
         </div>
@@ -81,7 +81,7 @@ export function BookingDialog({ info }: { info: BookingInfo }) {
         ) : null}
 
         {info.phoneHref && info.phoneDisplay ? (
-          <div className={info.online ? "mt-8 border-t border-ink/10 pt-6" : "mt-5"}>
+          <div className={info.online ? "mt-8 border-t border-clay pt-6" : "mt-5"}>
             <p className="prose-body">
               {info.online ? "Vous pouvez aussi appeler le cabinet :" : "Les rendez-vous se prennent par téléphone, directement auprès du cabinet."}
             </p>
@@ -97,7 +97,7 @@ export function BookingDialog({ info }: { info: BookingInfo }) {
         ) : null}
 
         {info.hours.length ? (
-          <div className="mt-8 border-t border-ink/10 pt-6">
+          <div className="mt-8 border-t border-clay pt-6">
             <p className="flex items-center gap-2 text-sm font-medium text-ink">
               <ClockIcon className="h-4 w-4 text-bronze-ink" /> Horaires
             </p>
@@ -113,14 +113,14 @@ export function BookingDialog({ info }: { info: BookingInfo }) {
         ) : null}
 
         {info.addressLine ? (
-          <div className="mt-6 border-t border-ink/10 pt-6">
+          <div className="mt-6 border-t border-clay pt-6">
             <p className="flex items-center gap-2 text-sm font-medium text-ink">
               <RouteIcon className="h-4 w-4 text-bronze-ink" /> Cabinet
             </p>
             <p className="mt-2 text-[0.95rem]">{info.addressLine}</p>
             {info.addressHint ? <p className="mt-1 text-sm text-ink-soft">{info.addressHint}</p> : null}
             {info.directionsHref ? (
-              <a href={info.directionsHref} target="_blank" rel="noopener noreferrer" className="link-line mt-3 inline-block text-sm font-medium">
+              <a href={info.directionsHref} target="_blank" rel="noopener noreferrer" className="link-more mt-3 inline-block text-sm font-medium">
                 Itinéraire<span className="sr-only"> (Google Maps, nouvel onglet)</span>
               </a>
             ) : null}
@@ -130,7 +130,7 @@ export function BookingDialog({ info }: { info: BookingInfo }) {
         {info.feesNote ? <p className="mt-6 text-sm text-ink-soft">{info.feesNote}</p> : null}
 
         <p className="mt-6 text-sm">
-          <Link href="/rendez-vous" onClick={close} className="link-line text-ink-soft hover:text-ink">
+          <Link href="/rendez-vous" onClick={close} className="link-more text-ink-soft hover:text-ink">
             Toutes les informations pratiques
           </Link>
         </p>
